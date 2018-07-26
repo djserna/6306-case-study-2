@@ -1,3 +1,5 @@
+library(DataExplorer)
+
 #Read in File
 MHData <- read.csv("mental-heath-in-tech-2016_20161114.csv", header=TRUE, sep=",")
 
@@ -68,3 +70,27 @@ colnames(MHData)[colnames(MHData)=='Do.you.work.remotely.'] <- 'WorkRemotely'
 
 #List Column names
 colnames(MHData)
+
+#Graphical representation of missing vaules using 'DataExporer' library
+plot_missing(MHData, title = "Percent of Missing Values")
+
+#Function to count all NA's in columns
+propmiss <- function(dataframe) {
+  m <- sapply(dataframe, function(x) {
+    data.frame(
+      na_count=sum(is.na(x)),
+      Obs=length(x), 
+      perc_missing=sum(is.na(x))/length(x)*100
+    )
+  })
+  d <- data.frame(t(m))
+  d <- sapply(d, unlist)
+  d <- as.data.frame(d)
+  d$variable <- row.names(d)
+  row.names(d) <- NULL
+  d <- cbind(d[ncol(d)],d[-ncol(d)])
+  return(d[order(d$na_count, decreasing=TRUE), ])
+}
+
+#show results of NA's counted
+propmiss(MHData)
