@@ -1,4 +1,5 @@
 library(DataExplorer)
+library(sqldf)
 
 #Read in File
 MHData <- read.csv("mental-heath-in-tech-2016_20161114.csv", header=TRUE, sep=",")
@@ -94,3 +95,67 @@ propmiss <- function(dataframe) {
 
 #show results of NA's counted
 propmiss(MHData)
+
+#plot_correlation(MHData, maxcat = 5L, use = "pairwise.complete.obs")
+
+MHSUbset <- sqldf("SELECT 
+                      SelfEmployed
+                      ,ProvideMHCoverage
+                      ,AnonymityProtected
+                      ,DiscussMHCompanyNegative
+                      ,DiscussPHCompanyNegative
+                      ,DiscussMHWithBoss
+                      ,ObsNegOpenWithMH
+                      ,MedicalCoverage
+                      ,PercWorkAffectedByMH
+                      ,PrevCoAwareMHCoverage
+                      ,MHHurtCareer
+                      ,CoWorkersViewYouNegKnewMH
+                      ,NegResponseWithMH
+                      ,MHCurrently
+                      ,MHCurrentlyDiagnosed
+                      ,Age
+                      ,Gender
+                      ,State
+                      ,WorkRemotely
+,case 
+when ProvideMHCoverage = 'Not eligible for coverage / N/A' then 0
+when ProvideMHCoverage = 'No' then 0
+when ProvideMHCoverage = 'Yes' then 1
+when ProvideMHCoverage like 'I don' then 2
+else NULL 
+end as NUM_ProvideMHCoverage
+
+,case 
+when AnonymityProtected = 'No' then 0
+when AnonymityProtected = 'Yes' then 1
+when AnonymityProtected like 'I don' then 2
+else NULL 
+end as NUM_AnonymityProtected
+
+,case 
+when DiscussMHCompanyNegative = 'No' then 0
+when DiscussMHCompanyNegative = 'Yes' then 1
+when DiscussMHCompanyNegative = 'Maybe' then 2
+else NULL 
+end as NUM_DiscussMHCompanyNegative
+
+,case 
+when DiscussPHCompanyNegative = 'No' then 0
+when DiscussPHCompanyNegative = 'Yes' then 1
+when DiscussPHCompanyNegative = 'Maybe' then 2
+else NULL 
+end as NUM_DiscussPHCompanyNegative
+
+,case 
+when DiscussMHWithBoss = 'No' then 0
+when DiscussMHWithBoss = 'Yes' then 1
+when DiscussMHWithBoss = 'Maybe' then 2
+else NULL 
+end as NUM_DiscussMHWithBoss
+
+FROM MHData")
+
+colnames(MHSUbset)
+
+
