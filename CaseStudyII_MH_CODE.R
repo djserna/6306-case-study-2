@@ -170,21 +170,21 @@ else NULL
 end as CAT_PercWorkAffectedByMH
 
 ,case 
-when MHHurtCareer = 'Maybe' then 3
+when MHHurtCareer = 'Maybe' then 2
 when MHHurtCareer = 'No, ' then 0
 when MHHurtCareer = 'Yes, ' then 1
 else NULL 
 end as CAT_MHHurtCareer
 
 ,case 
-when CoWorkersViewYouNegKnewMH = 'Maybe' then 3
+when CoWorkersViewYouNegKnewMH = 'Maybe' then 2
 when CoWorkersViewYouNegKnewMH = 'No, ' then 0
 when CoWorkersViewYouNegKnewMH = 'Yes, ' then 1
 else NULL 
 end as NUM_CoWorkersViewYouNegKnewMH
 
 ,case 
-when MHCurrently = 'Maybe' then 3
+when MHCurrently = 'Maybe' then 2
 when MHCurrently = 'No, ' then 0
 when MHCurrently = 'Yes, ' then 1
 else NULL 
