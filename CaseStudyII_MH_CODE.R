@@ -98,7 +98,7 @@ propmiss(MHData)
 
 #plot_correlation(MHData, maxcat = 5L, use = "pairwise.complete.obs")
 
-MHSUbset <- sqldf("SELECT 
+MHSubset <- sqldf("SELECT 
                       SelfEmployed
                       ,ProvideMHCoverage
                       ,AnonymityProtected
@@ -252,6 +252,7 @@ end as CAT_CurrentPosition
 
 FROM MHData")
 
-colnames(MHSUbset)
+colnames(MHSubset)
+
 
 
