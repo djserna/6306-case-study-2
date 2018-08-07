@@ -326,6 +326,7 @@ else NULL end as CAT_NegResponseWithMH
 FROM MHData")
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 MHSUbsetAnalysis <- sqldf("SELECT
                               SelfEmployed
                               ,NUM_ProvideMHCoverage
@@ -354,6 +355,10 @@ colnames(MHSUbsetAnalysis)
 
 #write.csv(MHSUbset, file = "MHSubset.csv", row.names = FALSE)
 #write.csv(MHSUbsetAnalysis, file = "MHSUbsetAnalysis.csv", row.names = FALSE)
+=======
+colnames(MHSubset)
+
+>>>>>>> 678db06bfd157e8ace73460acfb0e050b10dd210
 =======
 colnames(MHSubset)
 
