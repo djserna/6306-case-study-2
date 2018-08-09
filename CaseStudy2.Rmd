@@ -9,11 +9,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r loadLibraries}
 if (!require(DataExplorer)) install.packages("DataExplorer")
 if (!require(sqldf)) install.packages("sqldf")
 if (!require(Hmisc)) install.packages("Hmisc")
+```
 
+```{r renameColumns}
 #Read in File
 MHData <- read.csv("mental-heath-in-tech-2016_20161114.csv", header=TRUE, sep=",")
 
@@ -84,7 +86,9 @@ colnames(MHData)[colnames(MHData)=='Do.you.work.remotely.'] <- 'WorkRemotely'
 
 #List Column names
 colnames(MHData)
+```
 
+```{r plotMissingValues}
 #Graphical representation of missing vaules using 'DataExporer' library
 plot_missing(MHData, title = "Percent of Missing Values")
 
@@ -108,7 +112,9 @@ propmiss <- function(dataframe) {
 
 #show results of NA's counted
 propmiss(MHData)
+```
 
+```{r dataSetup}
 #plot_correlation(MHData, maxcat = 5L, use = "pairwise.complete.obs")
 
 MHSubset <- sqldf("SELECT 
