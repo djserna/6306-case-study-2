@@ -292,10 +292,10 @@ splitDiagnosis <- function(row){
   returnValue
 }
 
-newDF <- data.frame()
-for (row in 1:nrow(MHSubset)){
-  newRow <- splitDiagnosis(MHSubset[row,])
-  rbind(newDF, newRow)
-}
+# newDF <- data.frame()
+# for (row in 1:nrow(MHSubset)){
+#   newRow <- splitDiagnosis(MHSubset[row,])
+#   rbind(newDF, newRow)
+# }
 
 ```
