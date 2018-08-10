@@ -9,11 +9,15 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r loadLibraries}
 if (!require(DataExplorer)) install.packages("DataExplorer")
 if (!require(sqldf)) install.packages("sqldf")
 if (!require(Hmisc)) install.packages("Hmisc")
+if (!require(tidyr)) install.packages("tidyr")
+if (!require(dplyr)) install.packages("dplyr")
+```
 
+```{r renameColumns}
 #Read in File
 MHData <- read.csv("mental-heath-in-tech-2016_20161114.csv", header=TRUE, sep=",")
 
@@ -84,7 +88,9 @@ colnames(MHData)[colnames(MHData)=='Do.you.work.remotely.'] <- 'WorkRemotely'
 
 #List Column names
 colnames(MHData)
+```
 
+```{r plotMissingValues}
 #Graphical representation of missing vaules using 'DataExporer' library
 plot_missing(MHData, title = "Percent of Missing Values")
 
@@ -108,7 +114,9 @@ propmiss <- function(dataframe) {
 
 #show results of NA's counted
 propmiss(MHData)
+```
 
+```{r dataSetup}
 #plot_correlation(MHData, maxcat = 5L, use = "pairwise.complete.obs")
 
 MHSubset <- sqldf("SELECT 
@@ -269,33 +277,17 @@ colnames(MHSubset)
 ```
 
 ```{r analysis}
-#doesn't work - states x must be nurmeric
-#correlationMatrix <- cor(as.matrix(MHData[,21:31]), use="complete.obs")
+explodeDataFrameColumn <- function(dataframe, columnName){
+  columnIndex <- which(names(dataframe) == columnName)
+  #remove rows with blank values
+  dataframe <- dataframe[!(is.na(dataframe[,columnIndex]) | dataframe[,columnIndex] == ""),]
 
-# library(tidyr)
-# test <- separate(MHSubset, MHSubset$MHCurrentlyDiagnosed, sep="\\|")
-# 
-# test2 <- separate(MHSubset[2,"MHCurrentlyDiagnosed"], "|")
-
-# MHDiagnoses <- sqldf("
-#  SELECT A.[CurrentPosition],  
-#      Split.a.value('.', 'VARCHAR(500)') AS String  
-#  FROM  (SELECT [CurrentPosition],  
-#          CAST ('<M>' + REPLACE([MHCurrentlyDiagnosed], ',', '</M><M>') + '</M>' AS XML) AS String  
-#      FROM MHSubset) AS A CROSS APPLY String.nodes ('/M') AS Split(a);
-# ")
-
-splitDiagnosis <- function(row){
-  diagnoses <- unlist(strsplit(as.character(row$MHCurrentlyDiagnosed), "\\|"))
-  positions <- unlist(strsplit(as.character(row$CurrentPosition), "\\|"))
-  returnValue <- data.frame(CurrentPosition = positions, Diagnoses = diagnoses)
-  returnValue
+  #Split pipe delimitted values into rows.
+  returnValue <- separate_rows(dataframe, columnName, sep = "\\|")
 }
 
-newDF <- data.frame()
-for (row in 1:nrow(MHSubset)){
-  newRow <- splitDiagnosis(MHSubset[row,])
-  rbind(newDF, newRow)
-}
+MHPosition <- data.frame(CurrentDiagnoses = MHSubset$MHCurrentlyDiagnosed, CurrentPosition = MHSubset$CurrentPosition)
 
+MHPositionSplit <- explodeDataFrameColumn(MHPosition, "CurrentDiagnoses")
+MHPositionSplit <- explodeDataFrameColumn(MHPositionSplit, "CurrentPosition")
 ```
