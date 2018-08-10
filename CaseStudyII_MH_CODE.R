@@ -21,7 +21,7 @@ colnames(MHData)[colnames(MHData)=='Would.you.feel.comfortable.discussing.a.ment
 colnames(MHData)[colnames(MHData)=='Would.you.feel.comfortable.discussing.a.mental.health.disorder.with.your.direct.supervisor.s..'] <- 'DiscussMHWithBoss'
 colnames(MHData)[colnames(MHData)=='Do.you.feel.that.your.employer.takes.mental.health.as.seriously.as.physical.health.'] <- 'CompanySeriousMHasPH'
 colnames(MHData)[colnames(MHData)=='Have.you.heard.of.or.observed.negative.consequences.for.co.workers.who.have.been.open.about.mental.health.issues.in.your.workplace.'] <- 'ObsNegOpenWithMH'
-colnames(MHData)[colnames(MHData)=='Do.you.have.medical.coverage..private.insurance.or.state.provided..which.includes.treatment.of.Ã‚.mental.health.issues.'] <- 'MedicalCoverage'
+colnames(MHData)[colnames(MHData)=='Do.you.have.medical.coverage..private.insurance.or.state.provided..which.includes.treatment.of.Â.mental.health.issues.'] <- 'MedicalCoverage'
 colnames(MHData)[colnames(MHData)=='Do.you.know.local.or.online.resources.to.seek.help.for.a.mental.health.disorder.'] <- 'KnowMHResources'
 colnames(MHData)[colnames(MHData)=='If.you.have.been.diagnosed.or.treated.for.a.mental.health.disorder..do.you.ever.reveal.this.to.clients.or.business.contacts.'] <- 'MHDisclosedToClients'
 colnames(MHData)[colnames(MHData)=='If.you.have.revealed.a.mental.health.issue.to.a.client.or.business.contact..do.you.believe.this.has.impacted.you.negatively.'] <- 'MHDisclosedToClientsWithNegActions'
@@ -325,9 +325,8 @@ else NULL end as CAT_NegResponseWithMH
                 
 FROM MHData")
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-MHSUbsetAnalysis <- sqldf("SELECT
+
+MHSubsetAnalysis <- sqldf("SELECT
                               SelfEmployed
                               ,NUM_ProvideMHCoverage
                               ,NUM_AnonymityProtected
@@ -347,21 +346,14 @@ MHSUbsetAnalysis <- sqldf("SELECT
                               ,State
                               ,CAT_CurrentPosition
                               ,WorkRemotely
-                      FROM MHSUbset")
+                      FROM MHSubset")
 
 
 
-colnames(MHSUbsetAnalysis)
+colnames(MHSubsetAnalysis)
 
-#write.csv(MHSUbset, file = "MHSubset.csv", row.names = FALSE)
-#write.csv(MHSUbsetAnalysis, file = "MHSUbsetAnalysis.csv", row.names = FALSE)
-=======
-colnames(MHSubset)
+write.csv(MHSUbset, file = "MHSubset.csv", row.names = FALSE)
+write.csv(MHSUbsetAnalysis, file = "MHSUbsetAnalysis.csv", row.names = FALSE)
 
->>>>>>> 678db06bfd157e8ace73460acfb0e050b10dd210
-=======
-colnames(MHSubset)
-
->>>>>>> 678db06bfd157e8ace73460acfb0e050b10dd210
 
 
