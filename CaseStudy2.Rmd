@@ -290,4 +290,14 @@ MHPosition <- data.frame(CurrentDiagnoses = MHSubset$MHCurrentlyDiagnosed, Curre
 
 MHPositionSplit <- explodeDataFrameColumn(MHPosition, "CurrentDiagnoses")
 MHPositionSplit <- explodeDataFrameColumn(MHPositionSplit, "CurrentPosition")
+
+diagnoses <- data.frame(Diagnosis = unique(MHPositionSplit$CurrentDiagnoses), DiagnosisCode = 1:length(unique(MHPositionSplit$CurrentDiagnoses)))
+positions <- data.frame(Position = unique(MHPositionSplit$CurrentPosition), PositionCode = 1:length(unique(MHPositionSplit$CurrentPosition)))
+
+colnames(MHPositionSplit) <- c("Diagnosis", "Position")
+
+MHPositionSplitCoded <- merge(MHPositionSplit, diagnoses, by = "Diagnosis")
+MHPositionSplitCoded <- merge(MHPositionSplitCoded, positions, by = "Position")
+plot(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)
+cor(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)
 ```
