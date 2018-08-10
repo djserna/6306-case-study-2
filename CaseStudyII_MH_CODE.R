@@ -98,232 +98,172 @@ propmiss(MHData)
 
 #plot_correlation(MHData, maxcat = 5L, use = "pairwise.complete.obs")
 
+#remove singlw quotes
+MHData$ProvideMHCoverage <- gsub("\'","", MHData$ProvideMHCoverage)
+MHData$AnonymityProtected <- gsub("\'","", MHData$AnonymityProtected)
+MHData$MHHurtCareer <- gsub("\'","", MHData$MHHurtCareer)
+MHData$CoWorkersViewYouNegKnewMH <- gsub("\'","", MHData$CoWorkersViewYouNegKnewMH)
+
 MHSubset <- sqldf("SELECT 
-                      SelfEmployed
-                      ,ProvideMHCoverage
-                      ,AnonymityProtected
-                      ,DiscussMHCompanyNegative
-                      ,DiscussPHCompanyNegative
-                      ,DiscussMHWithBoss
-                      ,ObsNegOpenWithMH
-                      ,MedicalCoverage
-                      ,PercWorkAffectedByMH
-                      ,PrevCoAwareMHCoverage
-                      ,MHHurtCareer
-                      ,CoWorkersViewYouNegKnewMH
-                      ,NegResponseWithMH
-                      ,MHCurrently
-                      ,MHCurrentlyDiagnosed
-                      ,Age
-                      ,Gender
-                      ,State
-                      ,CurrentPosition
-                      ,WorkRemotely
-,case 
-when ProvideMHCoverage = 'Not eligible for coverage / N/A' then 0
-when ProvideMHCoverage = 'No' then 0
-when ProvideMHCoverage = 'Yes' then 1
-when ProvideMHCoverage like 'I don' then 2
-else NULL 
-end as NUM_ProvideMHCoverage
-
-,case 
-when AnonymityProtected = 'No' then 0
-when AnonymityProtected = 'Yes' then 1
-when AnonymityProtected like 'I don' then 2
-else NULL 
-end as NUM_AnonymityProtected
-
-,case 
-when DiscussMHCompanyNegative = 'No' then 0
-when DiscussMHCompanyNegative = 'Yes' then 1
-when DiscussMHCompanyNegative = 'Maybe' then 2
-else NULL 
-end as NUM_DiscussMHCompanyNegative
-
-,case 
-when DiscussPHCompanyNegative = 'No' then 0
-when DiscussPHCompanyNegative = 'Yes' then 1
-when DiscussPHCompanyNegative = 'Maybe' then 2
-else NULL 
-end as NUM_DiscussPHCompanyNegative
-
-,case 
-when DiscussMHWithBoss = 'No' then 0
-when DiscussMHWithBoss = 'Yes' then 1
-when DiscussMHWithBoss = 'Maybe' then 2
-else NULL 
-end as NUM_DiscussMHWithBoss
-
-,case 
-when ObsNegOpenWithMH = 'No' then 0
-when ObsNegOpenWithMH = 'Yes' then 1
-else NULL 
-end as NUM_ObsNegOpenWithMH
-
-,case 
-when PercWorkAffectedByMH = '1-25%' then 'Low'
-when PercWorkAffectedByMH = '26-50%' then 'Low_to_Medium'
-when PercWorkAffectedByMH = '51-75%' then 'Medium'
-when PercWorkAffectedByMH = '76-100%' then 'High'
-else NULL 
-end as CAT_PercWorkAffectedByMH
-
-,case 
-when MHHurtCareer = 'Maybe' then 2
-when MHHurtCareer = 'No, ' then 0
-when MHHurtCareer = 'Yes, ' then 1
-else NULL 
-end as CAT_MHHurtCareer
-
-,case 
-when CoWorkersViewYouNegKnewMH = 'Maybe' then 2
-when CoWorkersViewYouNegKnewMH = 'No, ' then 0
-when CoWorkersViewYouNegKnewMH = 'Yes, ' then 1
-else NULL 
-end as NUM_CoWorkersViewYouNegKnewMH
-
-,case 
-when MHCurrently = 'Maybe' then 2
-when MHCurrently = 'No, ' then 0
-when MHCurrently = 'Yes, ' then 1
-else NULL 
-end as NUM_MHCurrently
-
-,case 
-when MHCurrentlyDiagnosed like 'Addictive Disorder' then 'Addiction'
-when MHCurrentlyDiagnosed like 'Anxiety' then 'Anxiety'
-when MHCurrentlyDiagnosed like 'Attention Def' then 'Attention'
-when MHCurrentlyDiagnosed like 'Autism' then 'Autism'
-when MHCurrentlyDiagnosed like 'Burn' then 'Burnout'
-when MHCurrentlyDiagnosed like 'Combination of physical' then 'Attention'
-when MHCurrentlyDiagnosed like 'Depression' then 'Depression'
-when MHCurrentlyDiagnosed like 'Eating Disorder' then 'Eating'
-when MHCurrentlyDiagnosed like 'I haven' then 'Unknown'
-when MHCurrentlyDiagnosed like 'Mood Disorder' then 'Mood'
-when MHCurrentlyDiagnosed like 'Obsessive-Compulsive Disorder' then 'Obsessive-Compulsive'
-when MHCurrentlyDiagnosed like 'PDD-NOS' then 'PDD-NOS'
-when MHCurrentlyDiagnosed like 'Personality Disorder' then 'Personality'
-when MHCurrentlyDiagnosed like 'Post-traumatic Stress Disorder' then 'PTSD'
-when MHCurrentlyDiagnosed like 'Schizotypal Personality Disorder' then 'Schizotypal'
-when MHCurrentlyDiagnosed like 'Seasonal Affective Disorder' then 'Seasonal_Affective'
-when MHCurrentlyDiagnosed like 'Sexual addiction' then 'Sexual_Addiction'
-when MHCurrentlyDiagnosed like 'Stress Response Syndromes' then 'Stress_Response'
-when MHCurrentlyDiagnosed like 'Transgender' then 'Transgender/Mood/Anxiety'
-when MHCurrentlyDiagnosed like 'Traumatic Brain Injury' then 'Traumatic_Brain_Injury'
-else NULL 
-end as CAT_MHCurrentlyDiagnosed
-
-,case
-when CurrentPosition = 'Designer' then 'Designer'
-when CurrentPosition = 'Support|Designer' then 'Designer'
-when CurrentPosition = 'Support|Designer|Front-end Developer' then 'Designer'
-when CurrentPosition = 'Back-end Developer' then 'Developer'
-when CurrentPosition = 'Other|Back-end Developer' then 'Developer'
-when CurrentPosition = 'Support|Back-end Developer' then 'Developer'
-when CurrentPosition = 'Support|Front-end Developer|Back-end Developer' then 'Developer'
-when CurrentPosition = 'Front-end Developer' then 'Developer'
-when CurrentPosition = 'Other|Designer|Front-end Developer' then 'Developer'
-when CurrentPosition = 'Other|Front-end Developer' then 'Developer'
-when CurrentPosition = 'Dev Evangelist/Advocate' then 'DevEvangelist'
-when CurrentPosition = 'Other|Dev Evangelist/Advocate' then 'DevEvangelist'
-when CurrentPosition = 'DevOps/SysAdmin' then 'DevOps'
-when CurrentPosition = 'Other|DevOps/SysAdmin|Back-end Developer' then 'DevOps'
-when CurrentPosition = 'Support|DevOps/SysAdmin' then 'DevOps'
-when CurrentPosition = 'Executive Leadership' then 'Exec_Leadership'
-when CurrentPosition = 'Other|Executive Leadership' then 'Exec_Leadership'
-when CurrentPosition = 'HR' then 'HR'
-when CurrentPosition = 'Other|HR' then 'HR'
-when CurrentPosition = 'One-person shop' then 'OnePerson'
-when CurrentPosition = 'Other|Front-end Developer|Designer|One-person shop' then 'OnePerson'
-when CurrentPosition = 'Other|One-person shop' then 'OnePerson'
-when CurrentPosition = 'Sales|Support|DevOps/SysAdmin|Executive Leadership' then 'OnePerson'
-when CurrentPosition = 'Support|Sales|Back-end Developer|Front-end Developer|Designer|One-person shop' then 'OnePerson'
-when CurrentPosition = 'Other' then 'Other'
-when CurrentPosition = 'Support|Other' then 'Other'
-when CurrentPosition = 'Sales' then 'Sales'
-when CurrentPosition = 'Other|Supervisor/Team Lead' then 'Supervisor'
-when CurrentPosition = 'Supervisor/Team Lead' then 'Supervisor'
-when CurrentPosition = 'Support|HR|Supervisor/Team Lead|Executive Leadership' then 'Supervisor'
-when CurrentPosition = 'Other|Support' then 'Support'
-when CurrentPosition = 'Support' then 'Support'
-end as CAT_CurrentPosition 
-
-,case
-when [Gender] = 'Male' then 'M'
-when [Gender] = 'Male ' then 'M'
-when [Gender] = 'Female' then 'F'
-when [Gender] = 'M' then 'M'
-when [Gender] = 'I identify as female.' then 'F'
-when [Gender] = 'female ' then 'F'
-when [Gender] = 'Bigender' then 'B'
-when [Gender] = 'non-binary' then 'Unknown'
-when [Gender] = 'Female assigned at birth ' then 'F'
-when [Gender] = 'F' then 'F'
-when [Gender] = 'Woman' then 'F'
-when [Gender] = 'man' then 'M'
-when [Gender] = 'fm' then 'F'
-when [Gender] = 'Cis female ' then 'F'
-when [Gender] = 'Transitioned, M2F' then 'F'
-when [Gender] = 'Genderfluid (born female)' then 'F'
-when [Gender] = 'Other/Transfeminine' then 'Unknown'
-when [Gender] = 'Female or Multi-Gender Femme' then 'F'
-when [Gender] = 'female/woman' then 'F'
-when [Gender] = 'Cis male' then 'M'
-when [Gender] = 'Male.' then 'M'
-when [Gender] = 'Androgynous' then 'Unknown'
-when [Gender] = 'male 9:1 female, roughly' then 'M'
-when [Gender] = 'N/A' then 'Unknown'
-when [Gender] = 'Male (cis)' then 'M'
-when [Gender] = 'Other' then 'Unknown'
-when [Gender] = 'nb masculine' then 'M'
-when [Gender] = 'Cisgender Female' then 'F'
-when [Gender] = 'Sex is male' then 'M'
-when [Gender] = 'none of your business' then 'Unknown'
-when [Gender] = 'genderqueer' then 'Unknown'
-when [Gender] = 'Human' then 'Unknown'
-when [Gender] = 'Genderfluid' then 'Unknown'
-when [Gender] = 'Enby' then 'Unknown'
-when [Gender] = 'Malr' then 'Unknown'
-when [Gender] = 'genderqueer woman' then 'W'
-when [Gender] = 'mtf' then 'F'
-when [Gender] = 'Queer' then 'Unknown'
-when [Gender] = 'Agender' then 'Unknown'
-when [Gender] = 'Dude' then 'M'
-when [Gender] = 'Fluid' then 'Unknown'
-when [Gender] = 'mail' then 'M'
-when [Gender] = 'M|' then 'M'
-when [Gender] = 'Male/genderqueer' then 'M'
-when [Gender] = 'fem' then 'F'
-when [Gender] = 'Nonbinary' then 'Unknown'
-when [Gender] = 'Female (props for making this a freeform field, though)' then 'F'
-when [Gender] = ' Female' then 'F'
-when [Gender] = 'Unicorn' then 'Unknown'
-when [Gender] = 'Male (trans, FtM)' then 'M'
-when [Gender] = 'Cis-woman' then 'W'
-when [Gender] = 'cisdude' then 'M'
-when [Gender] = 'Genderflux demi-girl' then 'M'
-when [Gender] = 'female-bodied; no feelings about gender' then 'M'
-when [Gender] = 'cis man' then 'M'
-when [Gender] like 'I' then 'M'
-else NUll end as CAT_Gender
-
-,case
-when MedicalCoverage = 0 then 0
-when MedicalCoverage = 1 then 1
-when MedicalCoverage = 'NA' then NULL
-when MedicalCoverage is NULL then NULL
-else NULL end as NUM_MedicalCoverage
-
-,case
-when NegResponseWithMH = 'No' then 'No'
-when NegResponseWithMH = 'Maybe/Not sure' then 'Maybe'
-when NegResponseWithMH = 'Yes, I experienced' then 'Yes'
-when NegResponseWithMH = 'Yes, I observed' then 'Yes'
-when NegResponseWithMH = 'N/A' then 'Unknown'
-else NULL end as CAT_NegResponseWithMH
-                
-FROM MHData")
+                  SelfEmployed
+                  ,ProvideMHCoverage
+                  ,AnonymityProtected
+                  ,DiscussMHCompanyNegative
+                  ,DiscussPHCompanyNegative
+                  ,DiscussMHWithBoss
+                  ,ObsNegOpenWithMH
+                  ,MedicalCoverage
+                  ,PercWorkAffectedByMH
+                  ,PrevCoAwareMHCoverage
+                  ,MHHurtCareer
+                  ,CoWorkersViewYouNegKnewMH
+                  ,NegResponseWithMH
+                  ,MHCurrently
+                  ,MHCurrentlyDiagnosed
+                  ,Age
+                  ,Gender
+                  ,State
+                  ,CurrentPosition
+                  ,WorkRemotely
+                  
+                  ,case 
+                  when ProvideMHCoverage = 'Not eligible for coverage / N/A' then 0
+                  when ProvideMHCoverage = 'No' then 0
+                  when ProvideMHCoverage = 'Yes' then 1
+                  when ProvideMHCoverage = 'I dont know' then 2
+                  else NULL 
+                  end as NUM_ProvideMHCoverage
+                  
+                  ,case 
+                  when AnonymityProtected = 'No' then 0
+                  when AnonymityProtected = 'Yes' then 1
+                  when AnonymityProtected = 'I dont know' then 2
+                  else NULL 
+                  end as NUM_AnonymityProtected
+                  
+                  ,case 
+                  when DiscussMHCompanyNegative = 'No' then 0
+                  when DiscussMHCompanyNegative = 'Yes' then 1
+                  when DiscussMHCompanyNegative = 'Maybe' then 2
+                  else NULL 
+                  end as NUM_DiscussMHCompanyNegative
+                  
+                  ,case 
+                  when DiscussPHCompanyNegative = 'No' then 0
+                  when DiscussPHCompanyNegative = 'Yes' then 1
+                  when DiscussPHCompanyNegative = 'Maybe' then 2
+                  else NULL 
+                  end as NUM_DiscussPHCompanyNegative
+                  
+                  ,case 
+                  when DiscussMHWithBoss = 'No' then 0
+                  when DiscussMHWithBoss = 'Yes' then 1
+                  when DiscussMHWithBoss = 'Maybe' then 2
+                  else NULL 
+                  end as NUM_DiscussMHWithBoss
+                  
+                  ,case 
+                  when ObsNegOpenWithMH = 'No' then 0
+                  when ObsNegOpenWithMH = 'Yes' then 1
+                  else NULL 
+                  end as NUM_ObsNegOpenWithMH
+                  
+                  ,case 
+                  when PercWorkAffectedByMH = '1-25%' then 'Low'
+                  when PercWorkAffectedByMH = '26-50%' then 'Low_to_Medium'
+                  when PercWorkAffectedByMH = '51-75%' then 'Medium'
+                  when PercWorkAffectedByMH = '76-100%' then 'High'
+                  else NULL 
+                  end as CAT_PercWorkAffectedByMH
+                  
+                  ,case 
+                  when MHHurtCareer = 'Maybe' then 2
+                  when MHHurtCareer = 'No, I dont think it would' then 0
+                  when MHHurtCareer = 'No, it has not' then 0
+                  when MHHurtCareer = 'Yes, ' then 1
+                  when MHHurtCareer = 'Yes, I think it would' then 1
+                  when MHHurtCareer = 'Yes, it has' then 1
+                  else NULL 
+                  end as CAT_MHHurtCareer
+                  
+                  ,case 
+                  when CoWorkersViewYouNegKnewMH = 'Maybe' then 2
+                  when CoWorkersViewYouNegKnewMH = 'No, I dont think they would' then 0
+                  when CoWorkersViewYouNegKnewMH = 'No, they do not' then 0
+                  when CoWorkersViewYouNegKnewMH = 'Yes, ' then 1
+                  when CoWorkersViewYouNegKnewMH = 'Yes, I think they would' then 1
+                  when CoWorkersViewYouNegKnewMH = 'Yes, they do' then 1
+                  else NULL 
+                  end as NUM_CoWorkersViewYouNegKnewMH
+                  
+                  ,case 
+                  when MHCurrently = 'Maybe' then 2
+                  when MHCurrently = 'No' then 0
+                  when MHCurrently = 'Yes' then 1
+                  else NULL 
+                  end as NUM_MHCurrently
+                  
+                  ,case 
+                  when MHCurrentlyDiagnosed like 'Addictive Disorder' then 'Addiction'
+                  when MHCurrentlyDiagnosed like 'Anxiety' then 'Anxiety'
+                  when MHCurrentlyDiagnosed like 'Attention Def' then 'Attention'
+                  when MHCurrentlyDiagnosed like 'Autism' then 'Autism'
+                  when MHCurrentlyDiagnosed like 'Burn' then 'Burnout'
+                  when MHCurrentlyDiagnosed like 'Combination of physical' then 'Attention'
+                  when MHCurrentlyDiagnosed like 'Depression' then 'Depression'
+                  when MHCurrentlyDiagnosed like 'Eating Disorder' then 'Eating'
+                  when MHCurrentlyDiagnosed like 'I haven' then 'Unknown'
+                  when MHCurrentlyDiagnosed like 'Mood Disorder' then 'Mood'
+                  when MHCurrentlyDiagnosed like 'Obsessive-Compulsive Disorder' then 'Obsessive-Compulsive'
+                  when MHCurrentlyDiagnosed like 'PDD-NOS' then 'PDD-NOS'
+                  when MHCurrentlyDiagnosed like 'Personality Disorder' then 'Personality'
+                  when MHCurrentlyDiagnosed like 'Post-traumatic Stress Disorder' then 'PTSD'
+                  when MHCurrentlyDiagnosed like 'Schizotypal Personality Disorder' then 'Schizotypal'
+                  when MHCurrentlyDiagnosed like 'Seasonal Affective Disorder' then 'Seasonal_Affective'
+                  when MHCurrentlyDiagnosed like 'Sexual addiction' then 'Sexual_Addiction'
+                  when MHCurrentlyDiagnosed like 'Stress Response Syndromes' then 'Stress_Response'
+                  when MHCurrentlyDiagnosed like 'Transgender' then 'Transgender/Mood/Anxiety'
+                  when MHCurrentlyDiagnosed like 'Traumatic Brain Injury' then 'Traumatic_Brain_Injury'
+                  else NULL 
+                  end as CAT_MHCurrentlyDiagnosed
+                  
+                  ,case
+                  when CurrentPosition = 'Designer' then 'Designer'
+                  when CurrentPosition = 'Support|Designer' then 'Designer'
+                  when CurrentPosition = 'Support|Designer|Front-end Developer' then 'Designer'
+                  when CurrentPosition = 'Back-end Developer' then 'Developer'
+                  when CurrentPosition = 'Other|Back-end Developer' then 'Developer'
+                  when CurrentPosition = 'Support|Back-end Developer' then 'Developer'
+                  when CurrentPosition = 'Support|Front-end Developer|Back-end Developer' then 'Developer'
+                  when CurrentPosition = 'Front-end Developer' then 'Developer'
+                  when CurrentPosition = 'Other|Designer|Front-end Developer' then 'Developer'
+                  when CurrentPosition = 'Other|Front-end Developer' then 'Developer'
+                  when CurrentPosition = 'Dev Evangelist/Advocate' then 'DevEvangelist'
+                  when CurrentPosition = 'Other|Dev Evangelist/Advocate' then 'DevEvangelist'
+                  when CurrentPosition = 'DevOps/SysAdmin' then 'DevOps'
+                  when CurrentPosition = 'Other|DevOps/SysAdmin|Back-end Developer' then 'DevOps'
+                  when CurrentPosition = 'Support|DevOps/SysAdmin' then 'DevOps'
+                  when CurrentPosition = 'Executive Leadership' then 'Exec_Leadership'
+                  when CurrentPosition = 'Other|Executive Leadership' then 'Exec_Leadership'
+                  when CurrentPosition = 'HR' then 'HR'
+                  when CurrentPosition = 'Other|HR' then 'HR'
+                  when CurrentPosition = 'One-person shop' then 'OnePerson'
+                  when CurrentPosition = 'Other|Front-end Developer|Designer|One-person shop' then 'OnePerson'
+                  when CurrentPosition = 'Other|One-person shop' then 'OnePerson'
+                  when CurrentPosition = 'Sales|Support|DevOps/SysAdmin|Executive Leadership' then 'OnePerson'
+                  when CurrentPosition = 'Support|Sales|Back-end Developer|Front-end Developer|Designer|One-person shop' then 'OnePerson'
+                  when CurrentPosition = 'Other' then 'Other'
+                  when CurrentPosition = 'Support|Other' then 'Other'
+                  when CurrentPosition = 'Sales' then 'Sales'
+                  when CurrentPosition = 'Other|Supervisor/Team Lead' then 'Supervisor'
+                  when CurrentPosition = 'Supervisor/Team Lead' then 'Supervisor'
+                  when CurrentPosition = 'Support|HR|Supervisor/Team Lead|Executive Leadership' then 'Supervisor'
+                  when CurrentPosition = 'Other|Support' then 'Support'
+                  when CurrentPosition = 'Support' then 'Support'
+                  end as CAT_CurrentPosition 
+                  
+                  
+                  FROM MHData")
 
 
 MHSubsetAnalysis <- sqldf("SELECT
@@ -352,8 +292,8 @@ MHSubsetAnalysis <- sqldf("SELECT
 
 colnames(MHSubsetAnalysis)
 
-write.csv(MHSUbset, file = "MHSubset.csv", row.names = FALSE)
-write.csv(MHSUbsetAnalysis, file = "MHSUbsetAnalysis.csv", row.names = FALSE)
+#write.csv(MHSUbset, file = "MHSubset.csv", row.names = FALSE)
+#write.csv(MHSUbsetAnalysis, file = "MHSUbsetAnalysis.csv", row.names = FALSE)
 
 
 
