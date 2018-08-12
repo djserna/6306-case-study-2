@@ -280,6 +280,7 @@ MHSubsetAnalysis <- sqldf("SELECT
 
 ##############################
 ###
+###     Location Demographics
 ###   Data Frame of NO coverage
 ###
 ##############################
@@ -306,7 +307,7 @@ MHSubset_StateAnalysisNOs$sum <- ave(MHSubset_StateAnalysisNOs$CountOfNoCoverage
 colnames(MHSubset_StateAnalysisNOs)[colnames(MHSubset_StateAnalysisNOs)=='sum'] <- 'TotalNoCoverage'
 
 ##############################
-###
+###       
 ###   Data Frame of Yes coverage
 ###
 ##############################
@@ -375,7 +376,90 @@ StateAnalysis <- sqldf("SELECT *
 #Remove district of columbia -- outlier
 StateAnalysis <- StateAnalysis[!(StateAnalysis$State=="District of Columbia"),]
 
+##############################
+###
+###     Location Demographics
+###   MH Issues workers who work remotely
+###
+##############################
+library(car)
+install.packages("car")
+#Are there higher reports of mental health issues for remote workers?
+#No = 0
+#Yes = 1
+
+MHRemotely <- sqldf("SELECT 
+                    NUM_MHCurrently
+                    ,WorkRemotely
+                    FROM MHSubsetAnalysis
+                    WHERE NUM_MHCurrently <> 2")
+head(MHRemotely, 10)
+str(MHRemotely)
+
+#write.csv(MHRemotely, file="MHRemotely.csv", row.names = FALSE)
+
+ggplot(MHRemotely, aes(WorkRemotely, NUM_MHCurrently)) +
+  geom_boxplot()
+
+#Number obs in each category
+table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently)
+
+#Proportion of recieveing MH issue
+prop.table(table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently), margin = 1)*100
+
+#Chi square test of association
+chisq.test(table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently))
+
+fit1 <- glm(NUM_MHCurrently ~ WorkRemotely, data=MHRemotely, family = binomial )
+summary(fit1)
+
+Anova(fit1)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+##############################
+###
+###     Substance Abuse
+###  
+###
+##############################
+
+SubAbuse <- read.csv("SubstanceAbuse.csv", header=TRUE, sep="," ,strip.white = TRUE)
+
+
+SubstanceAbuse <- sqldf("SELECT
+NUM_AnonymityProtected
+,NUM_DiscussPHCompanyNegative
+      ,NUM_DiscussMHCompanyNegative
+      ,NUM_DiscussMHWithBoss
+      ,NUM_ObsNegOpenWithMH
+      ,CAT_MHHurtCareer
+      ,NUM_CoWorkersViewYouNegKnewMH
+      ,NUM_NegResponseWithMH
+      ,NUM_MHCurrently
+      ,MHCurrentlyDiagnosed
+      FROM MHSubset")
+
+#write.csv(SubstanceAbuse, file="SubstanceAbuse.csv", row.names = FALSE)
+
+
+
+#Do people with substance abuse disorder feel less willing to discuss the issue 
+#with their supervisor when compared to other disorders?
+#DiscussMHWithBoss
+#No = 0
+#Yes = 1
+#Maybe = 2
 
 
