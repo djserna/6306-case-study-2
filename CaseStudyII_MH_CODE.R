@@ -398,9 +398,6 @@ str(MHRemotely)
 
 #write.csv(MHRemotely, file="MHRemotely.csv", row.names = FALSE)
 
-ggplot(MHRemotely, aes(WorkRemotely, NUM_MHCurrently)) +
-  geom_boxplot()
-
 #Number obs in each category
 table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently)
 
