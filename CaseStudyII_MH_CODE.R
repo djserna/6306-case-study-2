@@ -1,6 +1,9 @@
 library(plyr)
 library(DataExplorer)
 library(sqldf)
+library(dplyr)
+library(tidyr)
+library(Hmisc)
 
 #Read in File
 MHData <- read.csv("mental-heath-in-tech-2016_20161114.csv", header=TRUE, sep="," ,strip.white = TRUE)

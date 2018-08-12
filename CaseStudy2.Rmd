@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r loadLibraries}
+if (!require(plyr)) install.packages("plyr")
 if (!require(DataExplorer)) install.packages("DataExplorer")
 if (!require(sqldf)) install.packages("sqldf")
 if (!require(Hmisc)) install.packages("Hmisc")
@@ -38,7 +39,7 @@ colnames(MHData)[colnames(MHData)=='Would.you.feel.comfortable.discussing.a.ment
 colnames(MHData)[colnames(MHData)=='Would.you.feel.comfortable.discussing.a.mental.health.disorder.with.your.direct.supervisor.s..'] <- 'DiscussMHWithBoss'
 colnames(MHData)[colnames(MHData)=='Do.you.feel.that.your.employer.takes.mental.health.as.seriously.as.physical.health.'] <- 'CompanySeriousMHasPH'
 colnames(MHData)[colnames(MHData)=='Have.you.heard.of.or.observed.negative.consequences.for.co.workers.who.have.been.open.about.mental.health.issues.in.your.workplace.'] <- 'ObsNegOpenWithMH'
-colnames(MHData)[colnames(MHData)=='Do.you.have.medical.coverage..private.insurance.or.state.provided..which.includes.treatment.of.Ã‚.mental.health.issues.'] <- 'MedicalCoverage'
+colnames(MHData)[colnames(MHData)=='Do.you.have.medical.coverage..private.insurance.or.state.provided..which.includes.treatment.of.Â.mental.health.issues.'] <- 'MedicalCoverage'
 colnames(MHData)[colnames(MHData)=='Do.you.know.local.or.online.resources.to.seek.help.for.a.mental.health.disorder.'] <- 'KnowMHResources'
 colnames(MHData)[colnames(MHData)=='If.you.have.been.diagnosed.or.treated.for.a.mental.health.disorder..do.you.ever.reveal.this.to.clients.or.business.contacts.'] <- 'MHDisclosedToClients'
 colnames(MHData)[colnames(MHData)=='If.you.have.revealed.a.mental.health.issue.to.a.client.or.business.contact..do.you.believe.this.has.impacted.you.negatively.'] <- 'MHDisclosedToClientsWithNegActions'
@@ -186,6 +187,13 @@ MHSubset <- sqldf("SELECT
                   when ObsNegOpenWithMH = 'Yes' then 1
                   else NULL 
                   end as NUM_ObsNegOpenWithMH
+
+                  ,case 
+                  when MedicalCoverage = 0 then 0
+                  when MedicalCoverage = 1 then 1
+                  when MedicalCoverage = 'NA' then NULL
+                  when MedicalCoverage is NULL then NULL
+                  end as NUM_MedicalCoverage
                   
                   ,case 
                   when PercWorkAffectedByMH = '1-25%' then 'Low'
@@ -214,6 +222,15 @@ MHSubset <- sqldf("SELECT
                   when CoWorkersViewYouNegKnewMH = 'Yes, they do' then 1
                   else NULL 
                   end as NUM_CoWorkersViewYouNegKnewMH
+
+,case
+when NegResponseWithMH = 'No' then 0
+when NegResponseWithMH = 'Maybe/Not sure' then 2
+when NegResponseWithMH = 'Yes, I experienced' then 1
+when NegResponseWithMH = 'Yes, I observed' then 1
+when NegResponseWithMH = 'N/A' then NULL
+when NegResponseWithMH is NULL then NULL
+else NULL end as NUM_NegResponseWithMH
                   
                   ,case 
                   when MHCurrently = 'Maybe' then 2
@@ -283,7 +300,7 @@ MHSubset <- sqldf("SELECT
                   
                   
                   FROM MHData")
-colnames(MHSubset)
+#colnames(MHSubset)
 ```
 
 ```{r analysis}
@@ -310,4 +327,139 @@ MHPositionSplitCoded <- merge(MHPositionSplit, diagnoses, by = "Diagnosis")
 MHPositionSplitCoded <- merge(MHPositionSplitCoded, positions, by = "Position")
 plot(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)
 cor(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)
+```
+
+## State Analysis
+
+1.   Is mental healthcare coverage higher in certain states?
+
+The team subsetted the data to only rows that had state names and for rows that had identified if the company provided mental health coverage.  From this inital exclusion of data the data was subsetted from 1,433 rows of data to 515 rows of data which constituents 36% of useable data.
+
+From the limited data set we can see that most companies offer mental health insurance, when normalizing the data to the per 1000 square miles of each state we see that Rhode Island, Massachusetts, and Maryland have thie highest coverage of mental health insurance.  This coincides when charting the coverage by region, which shows Northeast part of the US having the highest coverage.
+
+*District of Columbia was removed as an outlier in the data set*
+
+*Graphic provided by Spotfire application*
+![](Pics/CoverageDensity.PNG)
+
+```{r StateAnalysis}
+#Subset of data for analysis
+MHSubsetAnalysis <- sqldf("SELECT
+                              SelfEmployed
+                              ,NUM_ProvideMHCoverage
+                              ,NUM_AnonymityProtected
+                              ,NUM_DiscussMHCompanyNegative
+                              ,NUM_DiscussPHCompanyNegative
+                              ,NUM_DiscussMHWithBoss
+                              ,NUM_ObsNegOpenWithMH
+                              ,NUM_MedicalCoverage
+                              ,CAT_PercWorkAffectedByMH
+                              ,CAT_MHHurtCareer
+                              ,NUM_CoWorkersViewYouNegKnewMH
+                              ,NUM_NegResponseWithMH
+                              ,NUM_MHCurrently
+                              ,CAT_MHCurrentlyDiagnosed
+                              ,Age
+                              ,State
+                              ,CAT_CurrentPosition
+                              ,WorkRemotely
+                      FROM MHSubset")
+
+##############################
+###
+###   Data Frame of NO coverage
+###
+##############################
+#ProvideMHCoverage 0 = No
+#ProvideMHCoverage 1 = yes
+MHSubset_StateAnalysisNOs <- sqldf("Select 
+                                State
+                                ,NUM_ProvideMHCoverage
+                                FROM MHSubsetAnalysis
+                                WHERE State <> ''
+                                AND NUM_ProvideMHCoverage = 0")
+
+#count of medical centers by state
+MHSubset_StateAnalysisNOs <- sqldf("select State 
+                                  ,count(*) as CountOfNoCoverage
+                                  from MHSubsetAnalysis
+                                  WHERE State <> ''
+                                  AND NUM_ProvideMHCoverage = 0
+                                  group by State
+                                  Order by 2 desc")
+
+#Add sum column
+MHSubset_StateAnalysisNOs$sum <- ave(MHSubset_StateAnalysisNOs$CountOfNoCoverage, FUN=sum)
+colnames(MHSubset_StateAnalysisNOs)[colnames(MHSubset_StateAnalysisNOs)=='sum'] <- 'TotalNoCoverage'
+
+##############################
+###
+###   Data Frame of Yes coverage
+###
+##############################
+MHSubset_StateAnalysisYES <- sqldf("Select 
+                                State
+                                   ,NUM_ProvideMHCoverage
+                                   FROM MHSubsetAnalysis
+                                   WHERE State <> ''
+                                   AND NUM_ProvideMHCoverage = 1")
+
+#count of medical centers by state
+MHSubset_StateAnalysisYES <- sqldf("select State 
+                                   ,count(*) as CountOfYesCoverage
+                                   from MHSubsetAnalysis
+                                   WHERE State <> ''
+                                   AND NUM_ProvideMHCoverage = 1
+                                   group by State
+                                   Order by 2 desc")
+
+#Add sum column
+MHSubset_StateAnalysisYES$sum <- ave(MHSubset_StateAnalysisYES$CountOfYesCoverage, FUN=sum)
+colnames(MHSubset_StateAnalysisYES)[colnames(MHSubset_StateAnalysisYES)=='sum'] <- 'TotalYesCoverage'
+
+#################################
+#####                          
+#####    Make State DB         
+#####                          
+#################################
+
+#Create State DB data frame
+StateDB <- data.frame(state.name, state.area, state.region)
+colnames(StateDB)[colnames(StateDB)=='state.name'] <- 'State'
+colnames(StateDB)[colnames(StateDB)=='state.area'] <- 'StateSize_mi2' #Data is in Square miles
+colnames(StateDB)[colnames(StateDB)=='state.region'] <- 'StateRegion'
+
+#Add district of Columbia to StateDB Data Frame
+DistrictColumbia <- data.frame("District of Columbia", "68.34", "South")
+names(DistrictColumbia) <- c("State", "StateSize_mi2", "StateRegion")
+StateDB <- rbind(StateDB, DistrictColumbia)
+
+##############################
+###
+###   Merge yes and no data frames
+###       Merge StateDB
+###
+##############################
+
+#Merge Yes and No data frames
+StateAnalysis <- join(MHSubset_StateAnalysisYES, MHSubset_StateAnalysisNOs, by="State", type="full")
+
+#Merge StateDB
+StateAnalysis <- join(StateAnalysis, StateDB, by="State", type="inner")
+
+#######################################################
+####
+####   Calculate new variable Yes/No coverage density
+####
+#######################################################
+
+#Create density calculations
+StateAnalysis <- sqldf("SELECT *
+                             ,CountOfYesCoverage/(StateSize_mi2/1000.0) as YesCoverage_Density
+                             ,CountOfNoCoverage/(StateSize_mi2/1000.0) as NoCoverage_Density
+                             FROM StateAnalysis")
+
+#Remove district of columbia -- outlier
+StateAnalysis <- StateAnalysis[!(StateAnalysis$State=="District of Columbia"),]
+
 ```
