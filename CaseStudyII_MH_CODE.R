@@ -1,8 +1,9 @@
+library(plyr)
 library(DataExplorer)
 library(sqldf)
 
 #Read in File
-MHData <- read.csv("mental-heath-in-tech-2016_20161114.csv", header=TRUE, sep=",")
+MHData <- read.csv("mental-heath-in-tech-2016_20161114.csv", header=TRUE, sep="," ,strip.white = TRUE)
 
 #Update Column Names
 colnames(MHData)[colnames(MHData)=='Are.you.self.employed.'] <- 'SelfEmployed'
@@ -69,36 +70,7 @@ colnames(MHData)[colnames(MHData)=='What.US.state.or.territory.do.you.work.in.']
 colnames(MHData)[colnames(MHData)=='Which.of.the.following.best.describes.your.work.position.'] <- 'CurrentPosition'
 colnames(MHData)[colnames(MHData)=='Do.you.work.remotely.'] <- 'WorkRemotely'
 
-#List Column names
-colnames(MHData)
-
-#Graphical representation of missing vaules using 'DataExporer' library
-#plot_missing(MHData, title = "Percent of Missing Values")
-
-#Function to count all NA's in columns
-propmiss <- function(dataframe) {
-  m <- sapply(dataframe, function(x) {
-    data.frame(
-      na_count=sum(is.na(x)),
-      Obs=length(x), 
-      perc_missing=sum(is.na(x))/length(x)*100
-    )
-  })
-  d <- data.frame(t(m))
-  d <- sapply(d, unlist)
-  d <- as.data.frame(d)
-  d$variable <- row.names(d)
-  row.names(d) <- NULL
-  d <- cbind(d[ncol(d)],d[-ncol(d)])
-  return(d[order(d$na_count, decreasing=TRUE), ])
-}
-
-#show results of NA's counted
-propmiss(MHData)
-
-#plot_correlation(MHData, maxcat = 5L, use = "pairwise.complete.obs")
-
-#remove singlw quotes
+#remove single quotes
 MHData$ProvideMHCoverage <- gsub("\'","", MHData$ProvideMHCoverage)
 MHData$AnonymityProtected <- gsub("\'","", MHData$AnonymityProtected)
 MHData$MHHurtCareer <- gsub("\'","", MHData$MHHurtCareer)
@@ -167,6 +139,13 @@ MHSubset <- sqldf("SELECT
                   when ObsNegOpenWithMH = 'Yes' then 1
                   else NULL 
                   end as NUM_ObsNegOpenWithMH
+
+                  ,case 
+                  when MedicalCoverage = 0 then 0
+                  when MedicalCoverage = 1 then 1
+                  when MedicalCoverage = 'NA' then NULL
+                  when MedicalCoverage is NULL then NULL
+                  end as NUM_MedicalCoverage
                   
                   ,case 
                   when PercWorkAffectedByMH = '1-25%' then 'Low'
@@ -195,6 +174,15 @@ MHSubset <- sqldf("SELECT
                   when CoWorkersViewYouNegKnewMH = 'Yes, they do' then 1
                   else NULL 
                   end as NUM_CoWorkersViewYouNegKnewMH
+
+,case
+when NegResponseWithMH = 'No' then 0
+when NegResponseWithMH = 'Maybe/Not sure' then 2
+when NegResponseWithMH = 'Yes, I experienced' then 1
+when NegResponseWithMH = 'Yes, I observed' then 1
+when NegResponseWithMH = 'N/A' then NULL
+when NegResponseWithMH is NULL then NULL
+else NULL end as NUM_NegResponseWithMH
                   
                   ,case 
                   when MHCurrently = 'Maybe' then 2
@@ -278,22 +266,113 @@ MHSubsetAnalysis <- sqldf("SELECT
                               ,CAT_PercWorkAffectedByMH
                               ,CAT_MHHurtCareer
                               ,NUM_CoWorkersViewYouNegKnewMH
-                              ,CAT_NegResponseWithMH
+                              ,NUM_NegResponseWithMH
                               ,NUM_MHCurrently
                               ,CAT_MHCurrentlyDiagnosed
                               ,Age
-                              ,CAT_Gender
                               ,State
                               ,CAT_CurrentPosition
                               ,WorkRemotely
                       FROM MHSubset")
 
+##############################
+###
+###   Data Frame of NO coverage
+###
+##############################
+#ProvideMHCoverage 0 = No
+#ProvideMHCoverage 1 = yes
+MHSubset_StateAnalysisNOs <- sqldf("Select 
+                                State
+                                ,NUM_ProvideMHCoverage
+                                FROM MHSubsetAnalysis
+                                WHERE State <> ''
+                                AND NUM_ProvideMHCoverage = 0")
+
+#count of medical centers by state
+MHSubset_StateAnalysisNOs <- sqldf("select State 
+                                  ,count(*) as CountOfNoCoverage
+                                  from MHSubsetAnalysis
+                                  WHERE State <> ''
+                                  AND NUM_ProvideMHCoverage = 0
+                                  group by State
+                                  Order by 2 desc")
+
+#Add sum column
+MHSubset_StateAnalysisNOs$sum <- ave(MHSubset_StateAnalysisNOs$CountOfNoCoverage, FUN=sum)
+colnames(MHSubset_StateAnalysisNOs)[colnames(MHSubset_StateAnalysisNOs)=='sum'] <- 'TotalNoCoverage'
+
+##############################
+###
+###   Data Frame of Yes coverage
+###
+##############################
+MHSubset_StateAnalysisYES <- sqldf("Select 
+                                State
+                                   ,NUM_ProvideMHCoverage
+                                   FROM MHSubsetAnalysis
+                                   WHERE State <> ''
+                                   AND NUM_ProvideMHCoverage = 1")
+
+#count of medical centers by state
+MHSubset_StateAnalysisYES <- sqldf("select State 
+                                   ,count(*) as CountOfYesCoverage
+                                   from MHSubsetAnalysis
+                                   WHERE State <> ''
+                                   AND NUM_ProvideMHCoverage = 1
+                                   group by State
+                                   Order by 2 desc")
+
+#Add sum column
+MHSubset_StateAnalysisYES$sum <- ave(MHSubset_StateAnalysisYES$CountOfYesCoverage, FUN=sum)
+colnames(MHSubset_StateAnalysisYES)[colnames(MHSubset_StateAnalysisYES)=='sum'] <- 'TotalYesCoverage'
+
+#################################
+#####                          
+#####    Make State DB         
+#####                          
+#################################
+
+#Create State DB data frame
+StateDB <- data.frame(state.name, state.area, state.region)
+colnames(StateDB)[colnames(StateDB)=='state.name'] <- 'State'
+colnames(StateDB)[colnames(StateDB)=='state.area'] <- 'StateSize_mi2' #Data is in Square miles
+colnames(StateDB)[colnames(StateDB)=='state.region'] <- 'StateRegion'
+
+#Add district of Columbia to StateDB Data Frame
+DistrictColumbia <- data.frame("District of Columbia", "68.34", "South")
+names(DistrictColumbia) <- c("State", "StateSize_mi2", "StateRegion")
+StateDB <- rbind(StateDB, DistrictColumbia)
+
+##############################
+###
+###   Merge yes and no data frames
+###       Merge StateDB
+###
+##############################
+
+#Merge Yes and No data frames
+StateAnalysis <- join(MHSubset_StateAnalysisYES, MHSubset_StateAnalysisNOs, by="State", type="full")
+
+#Merge StateDB
+StateAnalysis <- join(StateAnalysis, StateDB, by="State", type="inner")
+
+#######################################################
+####
+####   Calculate new variable Yes/No coverage density
+####
+#######################################################
+
+#Create density calculations
+StateAnalysis <- sqldf("SELECT *
+                             ,CountOfYesCoverage/(StateSize_mi2/1000.0) as YesCoverage_Density
+                             ,CountOfNoCoverage/(StateSize_mi2/1000.0) as NoCoverage_Density
+                             FROM StateAnalysis")
+
+#Remove district of columbia -- outlier
+StateAnalysis <- StateAnalysis[!(StateAnalysis$State=="District of Columbia"),]
 
 
-colnames(MHSubsetAnalysis)
-
-#write.csv(MHSUbset, file = "MHSubset.csv", row.names = FALSE)
-#write.csv(MHSUbsetAnalysis, file = "MHSUbsetAnalysis.csv", row.names = FALSE)
 
 
 
