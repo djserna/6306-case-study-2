@@ -16,6 +16,7 @@ if (!require(sqldf)) install.packages("sqldf")
 if (!require(Hmisc)) install.packages("Hmisc")
 if (!require(tidyr)) install.packages("tidyr")
 if (!require(dplyr)) install.packages("dplyr")
+if (!require(car)) install.packages("car")
 ```
 
 ```{r renameColumns}
@@ -496,5 +497,55 @@ StateAnalysis <- sqldf("SELECT *
 
 #Remove district of columbia -- outlier
 StateAnalysis <- StateAnalysis[!(StateAnalysis$State=="District of Columbia"),]
+
+```
+
+
+## Remote Working Analysis
+
+1.   Are there higher reports of mental health issues for remote workers?
+
+The team subsetted the data to include the columns of 'WorkRemotely' and 'NUM_MHCurrently'.  These two columns are used to indicate if the observation has a mental health issue or not.  The team provided multiple ways to cross check the results to ensure that the results were verified.
+
+A table is produced that aggregates the groups by the categorical variable 'WorkRemotely'
+Always
+Never
+Sometimes
+
+The binary responses of 'NUM_MHCurrently' are:
+No = 0
+Yes = 1
+
+A proportion table is provided that shows the percentages of recieving a mental health issue by category.  From first look it seems that there is no significant chance of recieving a mental health issue from any of the categorical variables.  To test and confirm this hyptohesis the team decided to do a chi square test, a regression test, and a simple ANOVA test.  For each of these the test the Pvalue is greater than alpha of 0.05 indicating that there is no significant chance of recieving a mental health issue from working working at home, working at the office and at home, or working in the office full time.
+
+```{r RemoteAnalysis}
+##############################
+###
+###     Location Demographics
+###   MH Issues workers who work remotely
+###
+##############################
+
+#Are there higher reports of mental health issues for remote workers?
+#No = 0
+#Yes = 1
+
+MHRemotely <- sqldf("SELECT 
+                    NUM_MHCurrently
+                    ,WorkRemotely
+                    FROM MHSubsetAnalysis
+                    WHERE NUM_MHCurrently <> 2")
+
+#Number obs in each category
+table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently)
+
+#Proportion of recieveing MH issue
+prop.table(table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently), margin = 1)*100
+
+#Chi square test of association
+chisq.test(table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently))
+
+fit1 <- glm(NUM_MHCurrently ~ WorkRemotely, data=MHRemotely, family = binomial )
+summary(fit1)
 
 ```
