@@ -39,7 +39,7 @@ colnames(MHData)[colnames(MHData)=='Would.you.feel.comfortable.discussing.a.ment
 colnames(MHData)[colnames(MHData)=='Would.you.feel.comfortable.discussing.a.mental.health.disorder.with.your.direct.supervisor.s..'] <- 'DiscussMHWithBoss'
 colnames(MHData)[colnames(MHData)=='Do.you.feel.that.your.employer.takes.mental.health.as.seriously.as.physical.health.'] <- 'CompanySeriousMHasPH'
 colnames(MHData)[colnames(MHData)=='Have.you.heard.of.or.observed.negative.consequences.for.co.workers.who.have.been.open.about.mental.health.issues.in.your.workplace.'] <- 'ObsNegOpenWithMH'
-colnames(MHData)[colnames(MHData)=='Do.you.have.medical.coverage..private.insurance.or.state.provided..which.includes.treatment.of.Â.mental.health.issues.'] <- 'MedicalCoverage'
+colnames(MHData)[colnames(MHData)=='Do.you.have.medical.coverage..private.insurance.or.state.provided..which.includes.treatment.of.Ã‚.mental.health.issues.'] <- 'MedicalCoverage'
 colnames(MHData)[colnames(MHData)=='Do.you.know.local.or.online.resources.to.seek.help.for.a.mental.health.disorder.'] <- 'KnowMHResources'
 colnames(MHData)[colnames(MHData)=='If.you.have.been.diagnosed.or.treated.for.a.mental.health.disorder..do.you.ever.reveal.this.to.clients.or.business.contacts.'] <- 'MHDisclosedToClients'
 colnames(MHData)[colnames(MHData)=='If.you.have.revealed.a.mental.health.issue.to.a.client.or.business.contact..do.you.believe.this.has.impacted.you.negatively.'] <- 'MHDisclosedToClientsWithNegActions'
@@ -145,6 +145,13 @@ MHSubset <- sqldf("SELECT
                   ,State
                   ,CurrentPosition
                   ,WorkRemotely
+                  
+                  ,case
+                  when WorkRemotely = 'Never' then 0
+                  when WorkRemotely = 'Always' then 1
+                  when WorkRemotely = 'Sometimes' then 2
+                  else NULL
+                  end as NUM_WorkRemotely
                   
                   ,case 
                   when ProvideMHCoverage = 'Not eligible for coverage / N/A' then 0
@@ -300,49 +307,7 @@ else NULL end as NUM_NegResponseWithMH
                   
                   
                   FROM MHData")
-#colnames(MHSubset)
-```
 
-```{r analysis}
-explodeDataFrameColumn <- function(dataframe, columnName){
-  columnIndex <- which(names(dataframe) == columnName)
-  #remove rows with blank values
-  dataframe <- dataframe[!(is.na(dataframe[,columnIndex]) | dataframe[,columnIndex] == ""),]
-
-  #Split pipe delimitted values into rows.
-  returnValue <- separate_rows(dataframe, columnName, sep = "\\|")
-}
-
-MHPosition <- data.frame(CurrentDiagnoses = MHSubset$MHCurrentlyDiagnosed, CurrentPosition = MHSubset$CurrentPosition)
-
-MHPositionSplit <- explodeDataFrameColumn(MHPosition, "CurrentDiagnoses")
-MHPositionSplit <- explodeDataFrameColumn(MHPositionSplit, "CurrentPosition")
-
-diagnoses <- data.frame(Diagnosis = unique(MHPositionSplit$CurrentDiagnoses), DiagnosisCode = 1:length(unique(MHPositionSplit$CurrentDiagnoses)))
-positions <- data.frame(Position = unique(MHPositionSplit$CurrentPosition), PositionCode = 1:length(unique(MHPositionSplit$CurrentPosition)))
-
-colnames(MHPositionSplit) <- c("Diagnosis", "Position")
-
-MHPositionSplitCoded <- merge(MHPositionSplit, diagnoses, by = "Diagnosis")
-MHPositionSplitCoded <- merge(MHPositionSplitCoded, positions, by = "Position")
-plot(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)
-cor(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)
-```
-
-## State Analysis
-
-1.   Is mental healthcare coverage higher in certain states?
-
-The team subsetted the data to only rows that had state names and for rows that had identified if the company provided mental health coverage.  From this inital exclusion of data the data was subsetted from 1,433 rows of data to 515 rows of data which constituents 36% of useable data.
-
-From the limited data set we can see that most companies offer mental health insurance, when normalizing the data to the per 1000 square miles of each state we see that Rhode Island, Massachusetts, and Maryland have thie highest coverage of mental health insurance.  This coincides when charting the coverage by region, which shows Northeast part of the US having the highest coverage.
-
-*District of Columbia was removed as an outlier in the data set*
-
-*Graphic provided by Spotfire application*
-![](Pics/CoverageDensity.PNG)
-
-```{r StateAnalysis}
 #Subset of data for analysis
 MHSubsetAnalysis <- sqldf("SELECT
                               SelfEmployed
@@ -363,8 +328,78 @@ MHSubsetAnalysis <- sqldf("SELECT
                               ,State
                               ,CAT_CurrentPosition
                               ,WorkRemotely
+                              ,NUM_WorkRemotely
                       FROM MHSubset")
 
+#colnames(MHSubset)
+```
+
+## Job Analysis
+
+1. Do certain technology job roles line up with specific mental health diagnoses?
+
+Our team was interested in determining if there is a correlation between mental health diagnoses and technology job roles. For exammple, is there a higher prevelance of anxiety disorder attributed to back-end developers? If we can find a correlation, perhaps we can better target treatment based on a person's job role.
+
+By analyzing the data, we do not find any significant correlation between job role and mental health diagnoses. We will need to determine other avenues for targeting treatment.
+
+```{r jobRoleAnalysis}
+#Create a function that will massage our data into a consumable format.
+explodeDataFrameColumn <- function(dataframe, columnName){
+  columnIndex <- which(names(dataframe) == columnName)
+  #remove rows with blank values
+  dataframe <- dataframe[!(is.na(dataframe[,columnIndex]) | dataframe[,columnIndex] == ""),]
+
+  #Split pipe delimitted values into rows.
+  returnValue <- separate_rows(dataframe, columnName, sep = "\\|")
+}
+
+#Create a subset data frame to hold diagnoses and job role data.
+MHPosition <- data.frame(CurrentDiagnoses = MHSubset$MHCurrentlyDiagnosed, CurrentPosition = MHSubset$CurrentPosition)
+
+#break up the pipe delimitted values into rows.
+MHPositionSplit <- explodeDataFrameColumn(MHPosition, "CurrentDiagnoses")
+MHPositionSplit <- explodeDataFrameColumn(MHPositionSplit, "CurrentPosition")
+
+#create lookup tables so we can run correlation analysis
+diagnoses <- data.frame(Diagnosis = unique(MHPositionSplit$CurrentDiagnoses), DiagnosisCode = 1:length(unique(MHPositionSplit$CurrentDiagnoses)))
+positions <- data.frame(Position = unique(MHPositionSplit$CurrentPosition), PositionCode = 1:length(unique(MHPositionSplit$CurrentPosition)))
+
+#rename columns so we can use merge function.
+colnames(MHPositionSplit) <- c("Diagnosis", "Position")
+
+MHPositionSplitCoded <- merge(MHPositionSplit, diagnoses, by = "Diagnosis")
+MHPositionSplitCoded <- merge(MHPositionSplitCoded, positions, by = "Position")
+plot(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)
+#correlation value
+cor(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)
+```
+<!-- 2. Is there a correlation between remote work and mental health diagnosis? -->
+
+<!-- ```{r remoteWorkAnalysis} -->
+<!-- RemoteWorkAnalysis <- data.frame(WorkRemotely = MHSubsetAnalysis$NUM_WorkRemotely, CurrentlyDiagnosed = MHSubsetAnalysis$NUM_MHCurrently) -->
+<!-- RemoteWorkAnalysis <- RemoteWorkAnalysis[!(RemoteWorkAnalysis$WorkRemotely == 2 | RemoteWorkAnalysis$CurrentlyDiagnosed == 2),] -->
+<!-- plot(RemoteWorkAnalysis$WorkRemotely, RemoteWorkAnalysis$CurrentlyDiagnosed) -->
+<!-- cor(RemoteWorkAnalysis$WorkRemotely, RemoteWorkAnalysis$CurrentlyDiagnosed) -->
+<!-- ``` -->
+
+## Substance Abuse Analysis
+```{r substanceAbuseAnalysis}
+```
+
+## State Analysis
+
+1.   Is mental healthcare coverage higher in certain states?
+
+The team subsetted the data to only rows that had state names and for rows that had identified if the company provided mental health coverage.  From this inital exclusion of data the data was subsetted from 1,433 rows of data to 515 rows of data which constituents 36% of useable data.
+
+From the limited data set we can see that most companies offer mental health insurance, when normalizing the data to the per 1000 square miles of each state we see that Rhode Island, Massachusetts, and Maryland have thie highest coverage of mental health insurance.  This coincides when charting the coverage by region, which shows Northeast part of the US having the highest coverage.
+
+*District of Columbia was removed as an outlier in the data set*
+
+*Graphic provided by Spotfire application*
+![](Pics/CoverageDensity.PNG)
+
+```{r StateAnalysis}
 ##############################
 ###
 ###   Data Frame of NO coverage
