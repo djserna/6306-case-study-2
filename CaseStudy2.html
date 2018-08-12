@@ -172,6 +172,14 @@ $(document).ready(function () {
 <pre><code>## The following objects are masked from 'package:base':
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>if (!require(car)) install.packages(&quot;car&quot;)</code></pre>
+<pre><code>## Loading required package: car</code></pre>
+<pre><code>## Loading required package: carData</code></pre>
+<pre><code>## 
+## Attaching package: 'car'</code></pre>
+<pre><code>## The following object is masked from 'package:dplyr':
+## 
+##     recode</code></pre>
 <pre class="r"><code>#Read in File
 MHData &lt;- read.csv(&quot;mental-heath-in-tech-2016_20161114.csv&quot;, header=TRUE, sep=&quot;,&quot;)
 
@@ -644,6 +652,16 @@ plot(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)</cod
 <pre class="r"><code>#correlation value
 cor(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)</code></pre>
 <pre><code>## [1] 0.05798391</code></pre>
+<!-- 2. Is there a correlation between remote work and mental health diagnosis? -->
+<!-- ```{r remoteWorkAnalysis} -->
+<!-- RemoteWorkAnalysis <- data.frame(WorkRemotely = MHSubsetAnalysis$NUM_WorkRemotely, CurrentlyDiagnosed = MHSubsetAnalysis$NUM_MHCurrently) -->
+<!-- RemoteWorkAnalysis <- RemoteWorkAnalysis[!(RemoteWorkAnalysis$WorkRemotely == 2 | RemoteWorkAnalysis$CurrentlyDiagnosed == 2),] -->
+<!-- plot(RemoteWorkAnalysis$WorkRemotely, RemoteWorkAnalysis$CurrentlyDiagnosed) -->
+<!-- cor(RemoteWorkAnalysis$WorkRemotely, RemoteWorkAnalysis$CurrentlyDiagnosed) -->
+<!-- ``` -->
+</div>
+<div id="substance-abuse-analysis" class="section level2">
+<h2>Substance Abuse Analysis</h2>
 </div>
 <div id="state-analysis" class="section level2">
 <h2>State Analysis</h2>
@@ -750,6 +768,78 @@ StateAnalysis &lt;- sqldf(&quot;SELECT *
 
 #Remove district of columbia -- outlier
 StateAnalysis &lt;- StateAnalysis[!(StateAnalysis$State==&quot;District of Columbia&quot;),]</code></pre>
+</div>
+<div id="remote-working-analysis" class="section level2">
+<h2>Remote Working Analysis</h2>
+<ol style="list-style-type: decimal">
+<li>Are there higher reports of mental health issues for remote workers?</li>
+</ol>
+<p>The team subsetted the data to include the columns of ‘WorkRemotely’ and ‘NUM_MHCurrently’. These two columns are used to indicate if the observation has a mental health issue or not. The team provided multiple ways to cross check the results to ensure that the results were verified.</p>
+<p>A table is produced that aggregates the groups by the categorical variable ‘WorkRemotely’ Always Never Sometimes</p>
+<p>The binary responses of ‘NUM_MHCurrently’ are: No = 0 Yes = 1</p>
+<p>A proportion table is provided that shows the percentages of recieving a mental health issue by category. From first look it seems that there is no significant chance of recieving a mental health issue from any of the categorical variables. To test and confirm this hyptohesis the team decided to do a chi square test, a regression test, and a simple ANOVA test. For each of these the test the Pvalue is greater than alpha of 0.05 indicating that there is no significant chance of recieving a mental health issue from working working at home, working at the office and at home, or working in the office full time.</p>
+<pre class="r"><code>##############################
+###
+###     Location Demographics
+###   MH Issues workers who work remotely
+###
+##############################
+
+#Are there higher reports of mental health issues for remote workers?
+#No = 0
+#Yes = 1
+
+MHRemotely &lt;- sqldf(&quot;SELECT 
+                    NUM_MHCurrently
+                    ,WorkRemotely
+                    FROM MHSubsetAnalysis
+                    WHERE NUM_MHCurrently &lt;&gt; 2&quot;)
+
+#Number obs in each category
+table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently)</code></pre>
+<pre><code>##            
+##               0   1
+##   Always    120 136
+##   Never     117 129
+##   Sometimes 294 310</code></pre>
+<pre class="r"><code>#Proportion of recieveing MH issue
+prop.table(table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently), margin = 1)*100</code></pre>
+<pre><code>##            
+##                    0        1
+##   Always    46.87500 53.12500
+##   Never     47.56098 52.43902
+##   Sometimes 48.67550 51.32450</code></pre>
+<pre class="r"><code>#Chi square test of association
+chisq.test(table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently))</code></pre>
+<pre><code>## 
+##  Pearson's Chi-squared test
+## 
+## data:  table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently)
+## X-squared = 0.25917, df = 2, p-value = 0.8785</code></pre>
+<pre class="r"><code>fit1 &lt;- glm(NUM_MHCurrently ~ WorkRemotely, data=MHRemotely, family = binomial )
+summary(fit1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = NUM_MHCurrently ~ WorkRemotely, family = binomial, 
+##     data = MHRemotely)
+## 
+## Deviance Residuals: 
+##    Min      1Q  Median      3Q     Max  
+## -1.231  -1.200   1.125   1.155   1.155  
+## 
+## Coefficients:
+##                       Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)            0.12516    0.12524   0.999    0.318
+## WorkRemotelyNever     -0.02752    0.17884  -0.154    0.878
+## WorkRemotelySometimes -0.07217    0.14938  -0.483    0.629
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1531.5  on 1105  degrees of freedom
+## Residual deviance: 1531.2  on 1103  degrees of freedom
+## AIC: 1537.2
+## 
+## Number of Fisher Scoring iterations: 3</code></pre>
 </div>
 
 

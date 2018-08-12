@@ -304,9 +304,11 @@ else NULL end as NUM_NegResponseWithMH
                   when CurrentPosition = 'Support|HR|Supervisor/Team Lead|Executive Leadership' then 'Supervisor'
                   when CurrentPosition = 'Other|Support' then 'Support'
                   when CurrentPosition = 'Support' then 'Support'
-                  end as CAT_CurrentPosition 
-                  
-                  
+                  end as CAT_CurrentPosition
+                  ,case
+                    WHEN MHCurrentlyDiagnosed LIKE '%Substance Use%' then 1
+                    else 0
+                  end AS HasSubstanceAbuse
                   FROM MHData")
 
 #Subset of data for analysis
@@ -330,6 +332,8 @@ MHSubsetAnalysis <- sqldf("SELECT
                               ,CAT_CurrentPosition
                               ,WorkRemotely
                               ,NUM_WorkRemotely
+                              ,MHCurrentlyDiagnosed
+                              ,HasSubstanceAbuse
                       FROM MHSubset")
 
 #colnames(MHSubset)
@@ -382,10 +386,6 @@ cor(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)
 <!-- plot(RemoteWorkAnalysis$WorkRemotely, RemoteWorkAnalysis$CurrentlyDiagnosed) -->
 <!-- cor(RemoteWorkAnalysis$WorkRemotely, RemoteWorkAnalysis$CurrentlyDiagnosed) -->
 <!-- ``` -->
-
-## Substance Abuse Analysis
-```{r substanceAbuseAnalysis}
-```
 
 ## State Analysis
 
@@ -548,4 +548,8 @@ chisq.test(table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently))
 fit1 <- glm(NUM_MHCurrently ~ WorkRemotely, data=MHRemotely, family = binomial )
 summary(fit1)
 
+```
+
+## Substance Abuse Analysis
+```{r substanceAbuseAnalysis}
 ```
