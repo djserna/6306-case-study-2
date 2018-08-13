@@ -549,8 +549,8 @@ prop.table(table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently), margin = 
 #Chi square test of association
 chisq.test(table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently))
 
-fit1 <- glm(NUM_MHCurrently ~ WorkRemotely, data=MHRemotely, family = binomial )
-summary(fit1)
+fitRW <- glm(NUM_MHCurrently ~ WorkRemotely, data=MHRemotely, family = binomial )
+summary(fitRW)
 
 ```
 
@@ -588,8 +588,8 @@ prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseSupervisor$HasSubstanceAbuse,
 #Chi square test of association
 chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseSupervisor$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuseSupervisor$NUM_DiscussMHWithBoss))
 
-fit1 <- glm(NUM_DiscussMHWithBoss ~ HasSubstanceAbuse, data=MHSubstanceAbuseSupervisor, family = binomial )
-summary(fit1)
+fitSA <- glm(NUM_DiscussMHWithBoss ~ HasSubstanceAbuse, data=MHSubstanceAbuseSupervisor, family = binomial )
+summary(fitSA)
 ```
 
 
@@ -625,8 +625,8 @@ prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseAnonymity$HasSubstanceAbuse, 
 #Chi square test of association
 chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseAnonymity$HasSubstanceAbuse, AnonymityProtected=MHSubstanceAbuseAnonymity$NUM_AnonymityProtected))
 
-fit1 <- glm(NUM_AnonymityProtected ~ HasSubstanceAbuse, data=MHSubstanceAbuseAnonymity, family = binomial )
-summary(fit1)
+fitSAA <- glm(NUM_AnonymityProtected ~ HasSubstanceAbuse, data=MHSubstanceAbuseAnonymity, family = binomial )
+summary(fitSAA)
 ```
 
 3. Do workers with substance abuse disorder report that they have experience with unsuportive response when compared to other mental health issues?
@@ -661,8 +661,8 @@ prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseNegResponse$HasSubstanceAbuse
 #Chi square test of association
 chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseNegResponse$HasSubstanceAbuse, NegResponse=MHSubstanceAbuseNegResponse$NUM_NegResponseWithMH))
 
-fit1 <- glm(NUM_NegResponseWithMH ~ HasSubstanceAbuse, data=MHSubstanceAbuseNegResponse, family = binomial )
-summary(fit1)
+fitSAR <- glm(NUM_NegResponseWithMH ~ HasSubstanceAbuse, data=MHSubstanceAbuseNegResponse, family = binomial )
+summary(fitSAR)
 ```
 
 4. Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?
