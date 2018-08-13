@@ -631,17 +631,17 @@ summary(fit1)
 
 3. Do workers with substance abuse disorder report that they have experience with unsuportive response when compared to other mental health issues?
 
-The team subsetted the data to include the columns of 'HasSubstanceAbuse' and 'NUM_NegResponseWithMH'.  The NUM_NegResponseWithMH column is used to indicate if the observation reports observing or experiencing a negative repsonse with mental health issues in the workplace. The HasSubstanceAbuse column indicates if the observation's mental health issue relates to substance abuse.  The team provided multiple ways to cross check the results to ensure that the results were verified.
+The team subsetted the data to include the columns of 'HasSubstanceAbuse' and 'NUM_NegResponseWithMH'.  The NUM_NegResponseWithMH column is used to indicate if the observation reports observing or experiencing an unsuportive repsonse with mental health issues in the workplace. The HasSubstanceAbuse column indicates if the observation's mental health issue relates to substance abuse.  The team provided multiple ways to cross check the results to ensure that the results were verified.
 
 A table is produced that aggregates the groups by the binary variable 'HasSubstanceAbuse'
 
-The binary responses of 'NUM_AnonymityProtected' are:
+The binary responses of 'NUM_NegResponseWithMH' are:
 
 No = 0
 
 Yes = 1
 
-A proportion table is provided that shows the percentages of workers with mental health issues that report observing or experiencing a negative response to a mental health issue. It appears that workers with a substance abuse disorder are more likely to observe or experience a negativ reponse when compared to other mental health issues. 71.43% of workers with substance abuse disorder report a negative response compared to 54.99% of workers with other mental health issues. It is disturbing to see such a high report of negative responses for workers with substance abuse disorders.
+A proportion table is provided that shows the percentages of workers with mental health issues that report observing or experiencing an unsuportive response to a mental health issue. It appears that workers with a substance abuse disorder are more likely to observe or experience an unsuportive reponse when compared to other mental health issues. 71.43% of workers with substance abuse disorder report an unsuportive response compared to 54.99% of workers with other mental health issues. It is disturbing to see such a high report of unsuportive responses for workers with substance abuse disorders.
 
 ```{r substanceAbuseNegResponse}
 #Get a subset of workers with mental health issues for analysis
