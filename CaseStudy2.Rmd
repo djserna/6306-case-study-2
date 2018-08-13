@@ -513,7 +513,9 @@ Never
 Sometimes
 
 The binary responses of 'NUM_MHCurrently' are:
+
 No = 0
+
 Yes = 1
 
 A proportion table is provided that shows the percentages of recieving a mental health issue by category.  From first look it seems that there is no significant chance of recieving a mental health issue from any of the categorical variables.  To test and confirm this hyptohesis the team decided to do a chi square test, a regression test, and a simple ANOVA test.  For each of these the test the Pvalue is greater than alpha of 0.05 indicating that there is no significant chance of recieving a mental health issue from working working at home, working at the office and at home, or working in the office full time.
@@ -551,5 +553,46 @@ summary(fit1)
 ```
 
 ## Substance Abuse Analysis
-```{r substanceAbuseAnalysis}
+
+1. Do workes with substance abuse disorder feel more or less willing to discuss their issue with their supervisor when compared to other disorders?
+
+The team subsetted the data to include the columns of 'HasSubstanceAbuse' and 'NUM_DiscussMHWithBoss'.  The NUM_DiscussMHWithBoss column is used to indicate if the observation is willing to discuss their mental health issue with their direct supervisor. The HasSubstanceAbuse column indicates if the observation's mental health issue relates to substance abuse.  The team provided multiple ways to cross check the results to ensure that the results were verified.
+
+A table is produced that aggregates the groups by the binary variable 'HasSubstanceAbuse'
+
+The binary responses of 'NUM_DiscussMHWithBoss' are:
+
+No = 0
+
+Yes = 1
+
+A proportion table is provided that shows the percentages of workers with mental health issues that would discuss the issue with their direct supervisor. It appears that workers with a substance abuse disorder are more likely to discuss the situation with their boss when compared to workers with other mental health issues. 59.1% of workers with a substance abuse problem would discuss the issue with their supervisor compared to 53.8% of workers with other mental health issues. 
+
+```{r substanceAbuseSupervisor}
+#Get a subset of workers with mental health issues for analysis
+MHSubstanceAbuse <- sqldf("SELECT 
+                    NUM_DiscussMHWithBoss
+                    ,HasSubstanceAbuse
+                    FROM MHSubsetAnalysis
+                    WHERE NUM_DiscussMHWithBoss <> 2
+                    AND NUM_MHCurrently=1")
+
+#Number obs in each category
+table(HasSubstanceAbuse=MHSubstanceAbuse$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuse$NUM_DiscussMHWithBoss)
+
+#Proportion of those with substance abuset that would discuss the issue with their supervisor
+prop.table(table(HasSubstanceAbuse=MHSubstanceAbuse$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuse$NUM_DiscussMHWithBoss), margin = 1)*100
+
+#Chi square test of association
+chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuse$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuse$NUM_DiscussMHWithBoss))
+
+fit1 <- glm(NUM_DiscussMHWithBoss ~ HasSubstanceAbuse, data=MHSubstanceAbuse, family = binomial )
+summary(fit1)
 ```
+
+2. Do workers with substance abuse disorders report that their anonymity was not protected?
+
+3. Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?
+
+4. Do workers with substance abuse disorder report that they have experience with unsuportive response?
+
