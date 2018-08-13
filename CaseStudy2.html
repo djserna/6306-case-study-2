@@ -969,8 +969,68 @@ summary(fit1)</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 4</code></pre>
 <ol start="3" style="list-style-type: decimal">
-<li><p>Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?</p></li>
-<li><p>Do workers with substance abuse disorder report that they have experience with unsuportive response?</p></li>
+<li>Do workers with substance abuse disorder report that they have experience with unsuportive response when compared to other mental health issues?</li>
+</ol>
+<p>The team subsetted the data to include the columns of ‘HasSubstanceAbuse’ and ‘NUM_NegResponseWithMH’. The NUM_NegResponseWithMH column is used to indicate if the observation reports observing or experiencing a negative repsonse with mental health issues in the workplace. The HasSubstanceAbuse column indicates if the observation’s mental health issue relates to substance abuse. The team provided multiple ways to cross check the results to ensure that the results were verified.</p>
+<p>A table is produced that aggregates the groups by the binary variable ‘HasSubstanceAbuse’</p>
+<p>The binary responses of ‘NUM_AnonymityProtected’ are:</p>
+<p>No = 0</p>
+<p>Yes = 1</p>
+<p>A proportion table is provided that shows the percentages of workers with mental health issues that report observing or experiencing a negative response to a mental health issue. It appears that workers with a substance abuse disorder are more likely to observe or experience a negativ reponse when compared to other mental health issues. 71.43% of workers with substance abuse disorder report a negative response compared to 54.99% of workers with other mental health issues. It is disturbing to see such a high report of negative responses for workers with substance abuse disorders.</p>
+<pre class="r"><code>#Get a subset of workers with mental health issues for analysis
+MHSubstanceAbuseNegResponse &lt;- sqldf(&quot;SELECT 
+                    NUM_NegResponseWithMH
+                    ,HasSubstanceAbuse
+                    FROM MHSubsetAnalysis
+                    WHERE NUM_NegResponseWithMH &lt;&gt; 2
+                    AND NUM_MHCurrently=1&quot;)
+
+#Number obs in each category
+table(HasSubstanceAbuse=MHSubstanceAbuseNegResponse$HasSubstanceAbuse, NegResponse=MHSubstanceAbuseNegResponse$NUM_NegResponseWithMH)</code></pre>
+<pre><code>##                  NegResponse
+## HasSubstanceAbuse   0   1
+##                 0 176 215
+##                 1   8  20</code></pre>
+<pre class="r"><code>#Proportion of those with substance abuset that would discuss the issue with their supervisor
+prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseNegResponse$HasSubstanceAbuse, NegResponse=MHSubstanceAbuseNegResponse$NUM_NegResponseWithMH), margin = 1)*100</code></pre>
+<pre><code>##                  NegResponse
+## HasSubstanceAbuse        0        1
+##                 0 45.01279 54.98721
+##                 1 28.57143 71.42857</code></pre>
+<pre class="r"><code>#Chi square test of association
+chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseNegResponse$HasSubstanceAbuse, NegResponse=MHSubstanceAbuseNegResponse$NUM_NegResponseWithMH))</code></pre>
+<pre><code>## 
+##  Pearson's Chi-squared test with Yates' continuity correction
+## 
+## data:  table(HasSubstanceAbuse = MHSubstanceAbuseNegResponse$HasSubstanceAbuse,     NegResponse = MHSubstanceAbuseNegResponse$NUM_NegResponseWithMH)
+## X-squared = 2.239, df = 1, p-value = 0.1346</code></pre>
+<pre class="r"><code>fit1 &lt;- glm(NUM_NegResponseWithMH ~ HasSubstanceAbuse, data=MHSubstanceAbuseNegResponse, family = binomial )
+summary(fit1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = NUM_NegResponseWithMH ~ HasSubstanceAbuse, family = binomial, 
+##     data = MHSubstanceAbuseNegResponse)
+## 
+## Deviance Residuals: 
+##    Min      1Q  Median      3Q     Max  
+## -1.583  -1.264   1.094   1.094   1.094  
+## 
+## Coefficients:
+##                   Estimate Std. Error z value Pr(&gt;|z|)  
+## (Intercept)         0.2002     0.1017   1.969   0.0490 *
+## HasSubstanceAbuse   0.7161     0.4305   1.663   0.0962 .
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 574.63  on 418  degrees of freedom
+## Residual deviance: 571.65  on 417  degrees of freedom
+## AIC: 575.65
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?</li>
 </ol>
 </div>
 

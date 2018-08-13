@@ -629,7 +629,41 @@ fit1 <- glm(NUM_AnonymityProtected ~ HasSubstanceAbuse, data=MHSubstanceAbuseAno
 summary(fit1)
 ```
 
-3. Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?
+3. Do workers with substance abuse disorder report that they have experience with unsuportive response when compared to other mental health issues?
 
-4. Do workers with substance abuse disorder report that they have experience with unsuportive response?
+The team subsetted the data to include the columns of 'HasSubstanceAbuse' and 'NUM_NegResponseWithMH'.  The NUM_NegResponseWithMH column is used to indicate if the observation reports observing or experiencing a negative repsonse with mental health issues in the workplace. The HasSubstanceAbuse column indicates if the observation's mental health issue relates to substance abuse.  The team provided multiple ways to cross check the results to ensure that the results were verified.
+
+A table is produced that aggregates the groups by the binary variable 'HasSubstanceAbuse'
+
+The binary responses of 'NUM_AnonymityProtected' are:
+
+No = 0
+
+Yes = 1
+
+A proportion table is provided that shows the percentages of workers with mental health issues that report observing or experiencing a negative response to a mental health issue. It appears that workers with a substance abuse disorder are more likely to observe or experience a negativ reponse when compared to other mental health issues. 71.43% of workers with substance abuse disorder report a negative response compared to 54.99% of workers with other mental health issues. It is disturbing to see such a high report of negative responses for workers with substance abuse disorders.
+
+```{r substanceAbuseNegResponse}
+#Get a subset of workers with mental health issues for analysis
+MHSubstanceAbuseNegResponse <- sqldf("SELECT 
+                    NUM_NegResponseWithMH
+                    ,HasSubstanceAbuse
+                    FROM MHSubsetAnalysis
+                    WHERE NUM_NegResponseWithMH <> 2
+                    AND NUM_MHCurrently=1")
+
+#Number obs in each category
+table(HasSubstanceAbuse=MHSubstanceAbuseNegResponse$HasSubstanceAbuse, NegResponse=MHSubstanceAbuseNegResponse$NUM_NegResponseWithMH)
+
+#Proportion of those with substance abuset that would discuss the issue with their supervisor
+prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseNegResponse$HasSubstanceAbuse, NegResponse=MHSubstanceAbuseNegResponse$NUM_NegResponseWithMH), margin = 1)*100
+
+#Chi square test of association
+chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseNegResponse$HasSubstanceAbuse, NegResponse=MHSubstanceAbuseNegResponse$NUM_NegResponseWithMH))
+
+fit1 <- glm(NUM_NegResponseWithMH ~ HasSubstanceAbuse, data=MHSubstanceAbuseNegResponse, family = binomial )
+summary(fit1)
+```
+
+4. Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?
 
