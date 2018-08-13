@@ -339,15 +339,7 @@ MHSubsetAnalysis <- sqldf("SELECT
 #colnames(MHSubset)
 ```
 
-## Job Analysis
-
-1. Do certain technology job roles line up with specific mental health diagnoses?
-
-Our team was interested in determining if there is a correlation between mental health diagnoses and technology job roles. For exammple, is there a higher prevelance of anxiety disorder attributed to back-end developers? If we can find a correlation, perhaps we can better target treatment based on a person's job role.
-
-By analyzing the data, we do not find any significant correlation between job role and mental health diagnoses. We will need to determine other avenues for targeting treatment.
-
-```{r jobRoleAnalysis}
+```{r utilityFunctions}
 #Create a function that will massage our data into a consumable format.
 explodeDataFrameColumn <- function(dataframe, columnName){
   columnIndex <- which(names(dataframe) == columnName)
@@ -357,7 +349,17 @@ explodeDataFrameColumn <- function(dataframe, columnName){
   #Split pipe delimitted values into rows.
   returnValue <- separate_rows(dataframe, columnName, sep = "\\|")
 }
+```
 
+## Job Analysis
+
+1. Do certain technology job roles line up with specific mental health diagnoses?
+
+Our team was interested in determining if there is a correlation between mental health diagnoses and technology job roles. For exammple, is there a higher prevelance of anxiety disorder attributed to back-end developers? If we can find a correlation, perhaps we can better target treatment based on a person's job role.
+
+By analyzing the data, we do not find any significant correlation between job role and mental health diagnoses. We will need to determine other avenues for targeting treatment.
+
+```{r jobRoleAnalysis}
 #Create a subset data frame to hold diagnoses and job role data.
 MHPosition <- data.frame(CurrentDiagnoses = MHSubset$MHCurrentlyDiagnosed, CurrentPosition = MHSubset$CurrentPosition)
 
@@ -570,7 +572,7 @@ A proportion table is provided that shows the percentages of workers with mental
 
 ```{r substanceAbuseSupervisor}
 #Get a subset of workers with mental health issues for analysis
-MHSubstanceAbuse <- sqldf("SELECT 
+MHSubstanceAbuseSupervisor <- sqldf("SELECT 
                     NUM_DiscussMHWithBoss
                     ,HasSubstanceAbuse
                     FROM MHSubsetAnalysis
@@ -578,19 +580,54 @@ MHSubstanceAbuse <- sqldf("SELECT
                     AND NUM_MHCurrently=1")
 
 #Number obs in each category
-table(HasSubstanceAbuse=MHSubstanceAbuse$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuse$NUM_DiscussMHWithBoss)
+table(HasSubstanceAbuse=MHSubstanceAbuseSupervisor$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuseSupervisor$NUM_DiscussMHWithBoss)
 
 #Proportion of those with substance abuset that would discuss the issue with their supervisor
-prop.table(table(HasSubstanceAbuse=MHSubstanceAbuse$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuse$NUM_DiscussMHWithBoss), margin = 1)*100
+prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseSupervisor$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuseSupervisor$NUM_DiscussMHWithBoss), margin = 1)*100
 
 #Chi square test of association
-chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuse$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuse$NUM_DiscussMHWithBoss))
+chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseSupervisor$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuseSupervisor$NUM_DiscussMHWithBoss))
 
-fit1 <- glm(NUM_DiscussMHWithBoss ~ HasSubstanceAbuse, data=MHSubstanceAbuse, family = binomial )
+fit1 <- glm(NUM_DiscussMHWithBoss ~ HasSubstanceAbuse, data=MHSubstanceAbuseSupervisor, family = binomial )
 summary(fit1)
 ```
 
-2. Do workers with substance abuse disorders report that their anonymity was not protected?
+
+2. Do workers with substance abuse disorders report that their anonymity was more or less protected when compmared to other mental health issues?
+
+The team subsetted the data to include the columns of 'HasSubstanceAbuse' and 'NUM_AnonymityProtected'.  The NUM_AnonymityProtected column is used to indicate if the observation reports their anonymity was protected after divulging their mental health issue. The HasSubstanceAbuse column indicates if the observation's mental health issue relates to substance abuse.  The team provided multiple ways to cross check the results to ensure that the results were verified.
+
+A table is produced that aggregates the groups by the binary variable 'HasSubstanceAbuse'
+
+The binary responses of 'NUM_AnonymityProtected' are:
+
+No = 0
+
+Yes = 1
+
+A proportion table is provided that shows the percentages of workers with mental health issues that believe their anonymity was protected after divulging a mental health issue. It appears that workers with a substance abuse disorder are less likely to report their anonymity was protected when compared to other mental health issues. 72.22% of workers with substance abuse disorder report their anonymity was protected compared to 83.97% of workers with other mental health issues. It is encouraging to see that workers with both substance abuse disorders and other mental health issues report a high degree of anonymity.
+
+```{r substanceAbuseAnonymity}
+#Get a subset of workers with mental health issues for analysis
+MHSubstanceAbuseAnonymity <- sqldf("SELECT 
+                    NUM_AnonymityProtected
+                    ,HasSubstanceAbuse
+                    FROM MHSubsetAnalysis
+                    WHERE NUM_AnonymityProtected <> 2
+                    AND NUM_MHCurrently=1")
+
+#Number obs in each category
+table(HasSubstanceAbuse=MHSubstanceAbuseAnonymity$HasSubstanceAbuse, AnonymityProtected=MHSubstanceAbuseAnonymity$NUM_AnonymityProtected)
+
+#Proportion of those with substance abuset that would discuss the issue with their supervisor
+prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseAnonymity$HasSubstanceAbuse, AnonymityProtected=MHSubstanceAbuseAnonymity$NUM_AnonymityProtected), margin = 1)*100
+
+#Chi square test of association
+chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseAnonymity$HasSubstanceAbuse, AnonymityProtected=MHSubstanceAbuseAnonymity$NUM_AnonymityProtected))
+
+fit1 <- glm(NUM_AnonymityProtected ~ HasSubstanceAbuse, data=MHSubstanceAbuseAnonymity, family = binomial )
+summary(fit1)
+```
 
 3. Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?
 

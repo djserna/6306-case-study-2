@@ -618,13 +618,6 @@ MHSubsetAnalysis &lt;- sqldf(&quot;SELECT
                       FROM MHSubset&quot;)
 
 #colnames(MHSubset)</code></pre>
-<div id="job-analysis" class="section level2">
-<h2>Job Analysis</h2>
-<ol style="list-style-type: decimal">
-<li>Do certain technology job roles line up with specific mental health diagnoses?</li>
-</ol>
-<p>Our team was interested in determining if there is a correlation between mental health diagnoses and technology job roles. For exammple, is there a higher prevelance of anxiety disorder attributed to back-end developers? If we can find a correlation, perhaps we can better target treatment based on a person’s job role.</p>
-<p>By analyzing the data, we do not find any significant correlation between job role and mental health diagnoses. We will need to determine other avenues for targeting treatment.</p>
 <pre class="r"><code>#Create a function that will massage our data into a consumable format.
 explodeDataFrameColumn &lt;- function(dataframe, columnName){
   columnIndex &lt;- which(names(dataframe) == columnName)
@@ -633,9 +626,15 @@ explodeDataFrameColumn &lt;- function(dataframe, columnName){
 
   #Split pipe delimitted values into rows.
   returnValue &lt;- separate_rows(dataframe, columnName, sep = &quot;\\|&quot;)
-}
-
-#Create a subset data frame to hold diagnoses and job role data.
+}</code></pre>
+<div id="job-analysis" class="section level2">
+<h2>Job Analysis</h2>
+<ol style="list-style-type: decimal">
+<li>Do certain technology job roles line up with specific mental health diagnoses?</li>
+</ol>
+<p>Our team was interested in determining if there is a correlation between mental health diagnoses and technology job roles. For exammple, is there a higher prevelance of anxiety disorder attributed to back-end developers? If we can find a correlation, perhaps we can better target treatment based on a person’s job role.</p>
+<p>By analyzing the data, we do not find any significant correlation between job role and mental health diagnoses. We will need to determine other avenues for targeting treatment.</p>
+<pre class="r"><code>#Create a subset data frame to hold diagnoses and job role data.
 MHPosition &lt;- data.frame(CurrentDiagnoses = MHSubset$MHCurrentlyDiagnosed, CurrentPosition = MHSubset$CurrentPosition)
 
 #break up the pipe delimitted values into rows.
@@ -856,7 +855,7 @@ summary(fit1)</code></pre>
 <p>Yes = 1</p>
 <p>A proportion table is provided that shows the percentages of workers with mental health issues that would discuss the issue with their direct supervisor. It appears that workers with a substance abuse disorder are more likely to discuss the situation with their boss when compared to workers with other mental health issues. 59.1% of workers with a substance abuse problem would discuss the issue with their supervisor compared to 53.8% of workers with other mental health issues.</p>
 <pre class="r"><code>#Get a subset of workers with mental health issues for analysis
-MHSubstanceAbuse &lt;- sqldf(&quot;SELECT 
+MHSubstanceAbuseSupervisor &lt;- sqldf(&quot;SELECT 
                     NUM_DiscussMHWithBoss
                     ,HasSubstanceAbuse
                     FROM MHSubsetAnalysis
@@ -864,30 +863,30 @@ MHSubstanceAbuse &lt;- sqldf(&quot;SELECT
                     AND NUM_MHCurrently=1&quot;)
 
 #Number obs in each category
-table(HasSubstanceAbuse=MHSubstanceAbuse$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuse$NUM_DiscussMHWithBoss)</code></pre>
+table(HasSubstanceAbuse=MHSubstanceAbuseSupervisor$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuseSupervisor$NUM_DiscussMHWithBoss)</code></pre>
 <pre><code>##                  DiscussWithBoss
 ## HasSubstanceAbuse   0   1
 ##                 0 134 156
 ##                 1   9  13</code></pre>
 <pre class="r"><code>#Proportion of those with substance abuset that would discuss the issue with their supervisor
-prop.table(table(HasSubstanceAbuse=MHSubstanceAbuse$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuse$NUM_DiscussMHWithBoss), margin = 1)*100</code></pre>
+prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseSupervisor$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuseSupervisor$NUM_DiscussMHWithBoss), margin = 1)*100</code></pre>
 <pre><code>##                  DiscussWithBoss
 ## HasSubstanceAbuse        0        1
 ##                 0 46.20690 53.79310
 ##                 1 40.90909 59.09091</code></pre>
 <pre class="r"><code>#Chi square test of association
-chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuse$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuse$NUM_DiscussMHWithBoss))</code></pre>
+chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseSupervisor$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuseSupervisor$NUM_DiscussMHWithBoss))</code></pre>
 <pre><code>## 
 ##  Pearson's Chi-squared test with Yates' continuity correction
 ## 
-## data:  table(HasSubstanceAbuse = MHSubstanceAbuse$HasSubstanceAbuse,     DiscussWithBoss = MHSubstanceAbuse$NUM_DiscussMHWithBoss)
+## data:  table(HasSubstanceAbuse = MHSubstanceAbuseSupervisor$HasSubstanceAbuse,     DiscussWithBoss = MHSubstanceAbuseSupervisor$NUM_DiscussMHWithBoss)
 ## X-squared = 0.067028, df = 1, p-value = 0.7957</code></pre>
-<pre class="r"><code>fit1 &lt;- glm(NUM_DiscussMHWithBoss ~ HasSubstanceAbuse, data=MHSubstanceAbuse, family = binomial )
+<pre class="r"><code>fit1 &lt;- glm(NUM_DiscussMHWithBoss ~ HasSubstanceAbuse, data=MHSubstanceAbuseSupervisor, family = binomial )
 summary(fit1)</code></pre>
 <pre><code>## 
 ## Call:
 ## glm(formula = NUM_DiscussMHWithBoss ~ HasSubstanceAbuse, family = binomial, 
-##     data = MHSubstanceAbuse)
+##     data = MHSubstanceAbuseSupervisor)
 ## 
 ## Deviance Residuals: 
 ##    Min      1Q  Median      3Q     Max  
@@ -906,7 +905,70 @@ summary(fit1)</code></pre>
 ## 
 ## Number of Fisher Scoring iterations: 3</code></pre>
 <ol start="2" style="list-style-type: decimal">
-<li><p>Do workers with substance abuse disorders report that their anonymity was not protected?</p></li>
+<li>Do workers with substance abuse disorders report that their anonymity was more or less protected when compmared to other mental health issues?</li>
+</ol>
+<p>The team subsetted the data to include the columns of ‘HasSubstanceAbuse’ and ‘NUM_AnonymityProtected’. The NUM_AnonymityProtected column is used to indicate if the observation reports their anonymity was protected after divulging their mental health issue. The HasSubstanceAbuse column indicates if the observation’s mental health issue relates to substance abuse. The team provided multiple ways to cross check the results to ensure that the results were verified.</p>
+<p>A table is produced that aggregates the groups by the binary variable ‘HasSubstanceAbuse’</p>
+<p>The binary responses of ‘NUM_AnonymityProtected’ are:</p>
+<p>No = 0</p>
+<p>Yes = 1</p>
+<p>A proportion table is provided that shows the percentages of workers with mental health issues that believe their anonymity was protected after divulging a mental health issue. It appears that workers with a substance abuse disorder are less likely to report their anonymity was protected when compared to other mental health issues. 72.22% of workers with substance abuse disorder report their anonymity was protected compared to 83.97% of workers with other mental health issues. It is encouraging to see that workers with both substance abuse disorders and other mental health issues report a high degree of anonymity.</p>
+<pre class="r"><code>#Get a subset of workers with mental health issues for analysis
+MHSubstanceAbuseAnonymity &lt;- sqldf(&quot;SELECT 
+                    NUM_AnonymityProtected
+                    ,HasSubstanceAbuse
+                    FROM MHSubsetAnalysis
+                    WHERE NUM_AnonymityProtected &lt;&gt; 2
+                    AND NUM_MHCurrently=1&quot;)
+
+#Number obs in each category
+table(HasSubstanceAbuse=MHSubstanceAbuseAnonymity$HasSubstanceAbuse, AnonymityProtected=MHSubstanceAbuseAnonymity$NUM_AnonymityProtected)</code></pre>
+<pre><code>##                  AnonymityProtected
+## HasSubstanceAbuse   0   1
+##                 0  25 131
+##                 1   5  13</code></pre>
+<pre class="r"><code>#Proportion of those with substance abuset that would discuss the issue with their supervisor
+prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseAnonymity$HasSubstanceAbuse, AnonymityProtected=MHSubstanceAbuseAnonymity$NUM_AnonymityProtected), margin = 1)*100</code></pre>
+<pre><code>##                  AnonymityProtected
+## HasSubstanceAbuse        0        1
+##                 0 16.02564 83.97436
+##                 1 27.77778 72.22222</code></pre>
+<pre class="r"><code>#Chi square test of association
+chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseAnonymity$HasSubstanceAbuse, AnonymityProtected=MHSubstanceAbuseAnonymity$NUM_AnonymityProtected))</code></pre>
+<pre><code>## Warning in chisq.test(table(HasSubstanceAbuse =
+## MHSubstanceAbuseAnonymity$HasSubstanceAbuse, : Chi-squared approximation
+## may be incorrect</code></pre>
+<pre><code>## 
+##  Pearson's Chi-squared test with Yates' continuity correction
+## 
+## data:  table(HasSubstanceAbuse = MHSubstanceAbuseAnonymity$HasSubstanceAbuse,     AnonymityProtected = MHSubstanceAbuseAnonymity$NUM_AnonymityProtected)
+## X-squared = 0.847, df = 1, p-value = 0.3574</code></pre>
+<pre class="r"><code>fit1 &lt;- glm(NUM_AnonymityProtected ~ HasSubstanceAbuse, data=MHSubstanceAbuseAnonymity, family = binomial )
+summary(fit1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = NUM_AnonymityProtected ~ HasSubstanceAbuse, family = binomial, 
+##     data = MHSubstanceAbuseAnonymity)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.9136   0.5910   0.5910   0.5910   0.8067  
+## 
+## Coefficients:
+##                   Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)         1.6563     0.2183   7.589 3.22e-14 ***
+## HasSubstanceAbuse  -0.7008     0.5697  -1.230    0.219    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 159.97  on 173  degrees of freedom
+## Residual deviance: 158.58  on 172  degrees of freedom
+## AIC: 162.58
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<ol start="3" style="list-style-type: decimal">
 <li><p>Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?</p></li>
 <li><p>Do workers with substance abuse disorder report that they have experience with unsuportive response?</p></li>
 </ol>
