@@ -397,7 +397,9 @@ The team subsetted the data to only rows that had state names and for rows that 
 
 From the limited data set we can see that most companies offer mental health insurance, when normalizing the data to the per 1000 square miles of each state we see that Rhode Island, Massachusetts, and Maryland have thie highest coverage of mental health insurance.  This coincides when charting the coverage by region, which shows Northeast part of the US having the highest coverage.
 
-*District of Columbia was removed as an outlier in the data set*
+Though the analysis shows the Northeast having the most insured individuals with mental health coverage, the results should be used cautiously as the bulk of the observations are unuseable due to a lack of response.
+
+*District of Columbia was removed as it is not a state*
 
 *Graphic provided by Spotfire application*
 ![](Pics/CoverageDensity.PNG)
@@ -510,17 +512,17 @@ StateAnalysis <- StateAnalysis[!(StateAnalysis$State=="District of Columbia"),]
 The team subsetted the data to include the columns of 'WorkRemotely' and 'NUM_MHCurrently'.  These two columns are used to indicate if the observation has a mental health issue or not.  The team provided multiple ways to cross check the results to ensure that the results were verified.
 
 A table is produced that aggregates the groups by the categorical variable 'WorkRemotely'
-Always
-Never
-Sometimes
+    a.   Always
+    b.   Never
+    c.   Sometimes
 
 The binary responses of 'NUM_MHCurrently' are:
-
-No = 0
-
-Yes = 1
+    a.   No = 0
+    b.   Yes = 1
 
 A proportion table is provided that shows the percentages of recieving a mental health issue by category.  From first look it seems that there is no significant chance of recieving a mental health issue from any of the categorical variables.  To test and confirm this hyptohesis the team decided to do a chi square test, a regression test, and a simple ANOVA test.  For each of these the test the Pvalue is greater than alpha of 0.05 indicating that there is no significant chance of recieving a mental health issue from working working at home, working at the office and at home, or working in the office full time.
+
+From the data set provided the team concluded that there is no significant chance of being diagonsed with a mental health issue from individuals that work at the office, home, or both.
 
 ```{r RemoteAnalysis}
 ##############################
@@ -549,8 +551,8 @@ prop.table(table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently), margin = 
 #Chi square test of association
 chisq.test(table(MHRemotely$WorkRemotely, MHRemotely$NUM_MHCurrently))
 
-fit1 <- glm(NUM_MHCurrently ~ WorkRemotely, data=MHRemotely, family = binomial )
-summary(fit1)
+fitRW <- glm(NUM_MHCurrently ~ WorkRemotely, data=MHRemotely, family = binomial )
+summary(fitRW)
 
 ```
 
@@ -588,8 +590,8 @@ prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseSupervisor$HasSubstanceAbuse,
 #Chi square test of association
 chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseSupervisor$HasSubstanceAbuse, DiscussWithBoss=MHSubstanceAbuseSupervisor$NUM_DiscussMHWithBoss))
 
-fit1 <- glm(NUM_DiscussMHWithBoss ~ HasSubstanceAbuse, data=MHSubstanceAbuseSupervisor, family = binomial )
-summary(fit1)
+fitSA <- glm(NUM_DiscussMHWithBoss ~ HasSubstanceAbuse, data=MHSubstanceAbuseSupervisor, family = binomial )
+summary(fitSA)
 ```
 
 
@@ -625,8 +627,8 @@ prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseAnonymity$HasSubstanceAbuse, 
 #Chi square test of association
 chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseAnonymity$HasSubstanceAbuse, AnonymityProtected=MHSubstanceAbuseAnonymity$NUM_AnonymityProtected))
 
-fit1 <- glm(NUM_AnonymityProtected ~ HasSubstanceAbuse, data=MHSubstanceAbuseAnonymity, family = binomial )
-summary(fit1)
+fitSAA <- glm(NUM_AnonymityProtected ~ HasSubstanceAbuse, data=MHSubstanceAbuseAnonymity, family = binomial )
+summary(fitSAA)
 ```
 
 3. Do workers with substance abuse disorder report that they have experience with unsuportive response when compared to other mental health issues?
@@ -661,8 +663,8 @@ prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseNegResponse$HasSubstanceAbuse
 #Chi square test of association
 chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseNegResponse$HasSubstanceAbuse, NegResponse=MHSubstanceAbuseNegResponse$NUM_NegResponseWithMH))
 
-fit1 <- glm(NUM_NegResponseWithMH ~ HasSubstanceAbuse, data=MHSubstanceAbuseNegResponse, family = binomial )
-summary(fit1)
+fitSAR <- glm(NUM_NegResponseWithMH ~ HasSubstanceAbuse, data=MHSubstanceAbuseNegResponse, family = binomial )
+summary(fitSAR)
 ```
 
 4. Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?
