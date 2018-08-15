@@ -125,6 +125,9 @@ $(document).ready(function () {
 </div>
 
 
+<div id="mental-health" class="section level2">
+<h2>Mental Health</h2>
+<p>The data included in this study is provided by</p>
 <pre class="r"><code>if (!require(plyr)) install.packages(&quot;plyr&quot;)</code></pre>
 <pre><code>## Loading required package: plyr</code></pre>
 <pre class="r"><code>if (!require(DataExplorer)) install.packages(&quot;DataExplorer&quot;)</code></pre>
@@ -627,6 +630,7 @@ explodeDataFrameColumn &lt;- function(dataframe, columnName){
   #Split pipe delimitted values into rows.
   returnValue &lt;- separate_rows(dataframe, columnName, sep = &quot;\\|&quot;)
 }</code></pre>
+</div>
 <div id="job-analysis" class="section level2">
 <h2>Job Analysis</h2>
 <ol style="list-style-type: decimal">
@@ -1032,6 +1036,75 @@ summary(fitSAR)</code></pre>
 <ol start="4" style="list-style-type: decimal">
 <li>Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?</li>
 </ol>
+<p>The team subsetted the data to include the columns of ‘HasSubstanceAbuse’, ‘CAT_MHHurtCareer’, ‘NUM_ObsNegOpenWithMH’, and ‘NUM_CoWorkersViewYouNegKnewMH.’ We utilized these 3 data points as an aggregation to generate the “HasNegativeConsequence” column. If any of these questions were answered positively, we set the HasNegativeConsequence column to 1. Since many factors could be interpreted as negative consequences, we felt this was the best way to guage the situation. The HasSubstanceAbuse column indicates if the observation’s mental health issue relates to substance abuse. The team provided multiple ways to cross check the results to ensure that the results were verified.</p>
+<p>A table is produced that aggregates the groups by the binary variable ‘HasSubstanceAbuse’</p>
+<p>The binary responses of ‘HasNegativeConsequence’ are:</p>
+<p>No = 0</p>
+<p>Yes = 1</p>
+<p>A proportion table is provided that shows the percentages of workers with mental health issues that report experiencing negative consequences after divulging a mental health issue. Interestinlgy enough, both employees with substance abuse disorder and other mental health issues experienced similar rates of negative consequences. 73.33% of workers with substance abuse disorder reported experiencing negative consequences compared to 73.82% of workers with other mental health issues. It is unfortunate so see such a high percentage of workers reporting experiencing negative consequences after divulging a menthal health issue.</p>
+<pre class="r"><code>#Get a subset of workers with mental health issues for analysis
+MHSubstanceAbuseNegConsequence &lt;- sqldf(&quot;SELECT 
+                    CAT_MHHurtCareer
+                    ,NUM_ObsNegOpenWithMH
+                    ,NUM_CoWorkersViewYouNegKnewMH
+                    ,CASE
+                    WHEN CAT_MHHurtCareer = 1 OR NUM_ObsNegOpenWithMH = 1 OR NUM_CoWorkersViewYouNegKnewMH = 1 then 1
+                    else 0
+                    END as HasNegativeConsequence
+                    ,HasSubstanceAbuse
+                    FROM MHSubsetAnalysis
+                    WHERE NUM_ObsNegOpenWithMH &lt;&gt; 2
+                    AND CAT_MHHurtCareer &lt;&gt; 2
+                    AND NUM_CoWorkersViewYouNegKnewMH &lt;&gt; 2
+                    AND NUM_MHCurrently=1&quot;)
+
+#Number obs in each category
+table(HasSubstanceAbuse=MHSubstanceAbuseNegConsequence$HasSubstanceAbuse, NegConsequence=MHSubstanceAbuseNegConsequence$HasNegativeConsequence)</code></pre>
+<pre><code>##                  NegConsequence
+## HasSubstanceAbuse   0   1
+##                 0  50 141
+##                 1   4  11</code></pre>
+<pre class="r"><code>#Proportion of those with substance abuset that would discuss the issue with their supervisor
+prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseNegConsequence$HasSubstanceAbuse, NegConsequence=MHSubstanceAbuseNegConsequence$HasNegativeConsequence), margin = 1)*100</code></pre>
+<pre><code>##                  NegConsequence
+## HasSubstanceAbuse        0        1
+##                 0 26.17801 73.82199
+##                 1 26.66667 73.33333</code></pre>
+<pre class="r"><code>#Chi square test of association
+chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseNegConsequence$HasSubstanceAbuse, NegConsequence=MHSubstanceAbuseNegConsequence$HasNegativeConsequence))</code></pre>
+<pre><code>## Warning in chisq.test(table(HasSubstanceAbuse =
+## MHSubstanceAbuseNegConsequence$HasSubstanceAbuse, : Chi-squared
+## approximation may be incorrect</code></pre>
+<pre><code>## 
+##  Pearson's Chi-squared test with Yates' continuity correction
+## 
+## data:  table(HasSubstanceAbuse = MHSubstanceAbuseNegConsequence$HasSubstanceAbuse,     NegConsequence = MHSubstanceAbuseNegConsequence$HasNegativeConsequence)
+## X-squared = 7.048e-29, df = 1, p-value = 1</code></pre>
+<pre class="r"><code>fitSAC &lt;- glm(HasNegativeConsequence ~ HasSubstanceAbuse, data=MHSubstanceAbuseNegConsequence, family = binomial )
+summary(fitSAC)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = HasNegativeConsequence ~ HasSubstanceAbuse, family = binomial, 
+##     data = MHSubstanceAbuseNegConsequence)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.6372  -1.6259   0.7791   0.7791   0.7876  
+## 
+## Coefficients:
+##                   Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)        1.03674    0.16460   6.299    3e-10 ***
+## HasSubstanceAbuse -0.02514    0.60663  -0.041    0.967    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 237.02  on 205  degrees of freedom
+## Residual deviance: 237.01  on 204  degrees of freedom
+## AIC: 241.01
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
 </div>
 
 

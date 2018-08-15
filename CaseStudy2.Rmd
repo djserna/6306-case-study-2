@@ -674,3 +674,44 @@ summary(fitSAR)
 
 4. Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?
 
+The team subsetted the data to include the columns of 'HasSubstanceAbuse', 'CAT_MHHurtCareer', 'NUM_ObsNegOpenWithMH', and 'NUM_CoWorkersViewYouNegKnewMH.' We utilized these 3 data points as an aggregation to generate the "HasNegativeConsequence" column. If any of these questions were answered positively, we set the HasNegativeConsequence column to 1. Since many factors could be interpreted as negative consequences, we felt this was the best way to guage the situation. The HasSubstanceAbuse column indicates if the observation's mental health issue relates to substance abuse.  The team provided multiple ways to cross check the results to ensure that the results were verified.
+
+A table is produced that aggregates the groups by the binary variable 'HasSubstanceAbuse'
+
+The binary responses of 'HasNegativeConsequence' are:
+
+No = 0
+
+Yes = 1
+
+A proportion table is provided that shows the percentages of workers with mental health issues that report experiencing negative consequences after divulging a mental health issue. Interestinlgy enough, both employees with substance abuse disorder and other mental health issues experienced similar rates of negative consequences. 73.33% of workers with substance abuse disorder reported experiencing negative consequences compared to 73.82% of workers with other mental health issues. It is unfortunate so see such a high percentage of workers reporting experiencing negative consequences after divulging a menthal health issue.
+
+```{r substanceAbuseNegConsequence}
+#Get a subset of workers with mental health issues for analysis
+MHSubstanceAbuseNegConsequence <- sqldf("SELECT 
+                    CAT_MHHurtCareer
+                    ,NUM_ObsNegOpenWithMH
+                    ,NUM_CoWorkersViewYouNegKnewMH
+                    ,CASE
+                    WHEN CAT_MHHurtCareer = 1 OR NUM_ObsNegOpenWithMH = 1 OR NUM_CoWorkersViewYouNegKnewMH = 1 then 1
+                    else 0
+                    END as HasNegativeConsequence
+                    ,HasSubstanceAbuse
+                    FROM MHSubsetAnalysis
+                    WHERE NUM_ObsNegOpenWithMH <> 2
+                    AND CAT_MHHurtCareer <> 2
+                    AND NUM_CoWorkersViewYouNegKnewMH <> 2
+                    AND NUM_MHCurrently=1")
+
+#Number obs in each category
+table(HasSubstanceAbuse=MHSubstanceAbuseNegConsequence$HasSubstanceAbuse, NegConsequence=MHSubstanceAbuseNegConsequence$HasNegativeConsequence)
+
+#Proportion of those with substance abuset that would discuss the issue with their supervisor
+prop.table(table(HasSubstanceAbuse=MHSubstanceAbuseNegConsequence$HasSubstanceAbuse, NegConsequence=MHSubstanceAbuseNegConsequence$HasNegativeConsequence), margin = 1)*100
+
+#Chi square test of association
+chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseNegConsequence$HasSubstanceAbuse, NegConsequence=MHSubstanceAbuseNegConsequence$HasNegativeConsequence))
+
+fitSAC <- glm(HasNegativeConsequence ~ HasSubstanceAbuse, data=MHSubstanceAbuseNegConsequence, family = binomial )
+summary(fitSAC)
+```
