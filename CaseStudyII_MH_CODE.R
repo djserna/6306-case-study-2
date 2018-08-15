@@ -383,7 +383,7 @@ StateAnalysis <- StateAnalysis[!(StateAnalysis$State=="District of Columbia"),]
 ###
 ##############################
 library(car)
-install.packages("car")
+#install.packages("car")
 #Are there higher reports of mental health issues for remote workers?
 #No = 0
 #Yes = 1

@@ -9,10 +9,22 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Mental Health
+## Mental health within the workplace
 
-The data included in this study is provided by 
+The data included in this study is provided by Open Sourcing Mental Illnes, LTD.  The survey is to determine attitudes towards mental health disorders within tech workers.  [Survey data can be found here](https://www.kaggle.com/osmi/mental-health-in-tech-2016/home).
 
+As mental health start to move from the shadows of everyday life to the forefront of social media, traditional news outlet and even at the dinner table the team decided to put several question to analysis to better understand issues around mental health.
+
+The team set out to answer several questions:
+1.   Do certain technology job roles line up with specific mental health diagnoses?
+2.   Is mental healthcare coverage higher in certain states?
+3.   Are there higher reports of mental health issues for remote workers?
+4.   Do workes with substance abuse disorder feel more or less willing to discuss their issue with their supervisor when compared to other disorders?
+5.   Do workers with substance abuse disorders report that their anonymity was more or less protected when compmared to other mental health issues?
+6.   Do workers with substance abuse disorder report that they have experience with unsuportive response when compared to other mental health issues?
+7.   Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?
+
+The analysis below show the detail and ouputs of the analysis done on the data set.
 
 ```{r loadLibraries}
 if (!require(plyr)) install.packages("plyr")
@@ -124,7 +136,7 @@ propmiss(MHData)
 ```
 
 ```{r dataSetup}
-#remove singlw quotes
+#remove single quotes
 MHData$ProvideMHCoverage <- gsub("\'","", MHData$ProvideMHCoverage)
 MHData$AnonymityProtected <- gsub("\'","", MHData$AnonymityProtected)
 MHData$MHHurtCareer <- gsub("\'","", MHData$MHHurtCareer)
