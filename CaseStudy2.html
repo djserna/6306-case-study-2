@@ -125,9 +125,12 @@ $(document).ready(function () {
 </div>
 
 
-<div id="mental-health" class="section level2">
-<h2>Mental Health</h2>
-<p>The data included in this study is provided by</p>
+<div id="mental-health-within-the-workplace" class="section level2">
+<h2>Mental health within the workplace</h2>
+<p>The data included in this study is provided by Open Sourcing Mental Illnes, LTD. The survey is to determine attitudes towards mental health disorders within tech workers. <a href="https://www.kaggle.com/osmi/mental-health-in-tech-2016/home">Survey data can be found here</a>.</p>
+<p>As mental health start to move from the shadows of everyday life to the forefront of social media, traditional news outlet and even at the dinner table the team decided to put several question to analysis to better understand issues around mental health.</p>
+<p>The team set out to answer several questions: 1. Do certain technology job roles line up with specific mental health diagnoses? 2. Is mental healthcare coverage higher in certain states? 3. Are there higher reports of mental health issues for remote workers? 4. Do workes with substance abuse disorder feel more or less willing to discuss their issue with their supervisor when compared to other disorders? 5. Do workers with substance abuse disorders report that their anonymity was more or less protected when compmared to other mental health issues? 6. Do workers with substance abuse disorder report that they have experience with unsuportive response when compared to other mental health issues? 7. Do workers with substance abuse disorder report that they hear of negative consequences for co-workers with mental health issues?</p>
+<p>The analysis below show the detail and ouputs of the analysis done on the data set.</p>
 <pre class="r"><code>if (!require(plyr)) install.packages(&quot;plyr&quot;)</code></pre>
 <pre><code>## Loading required package: plyr</code></pre>
 <pre class="r"><code>if (!require(DataExplorer)) install.packages(&quot;DataExplorer&quot;)</code></pre>
@@ -403,7 +406,7 @@ propmiss(MHData)</code></pre>
 ## 61                           StateWorkIn        0 1433   0.00000000
 ## 62                       CurrentPosition        0 1433   0.00000000
 ## 63                          WorkRemotely        0 1433   0.00000000</code></pre>
-<pre class="r"><code>#remove singlw quotes
+<pre class="r"><code>#remove single quotes
 MHData$ProvideMHCoverage &lt;- gsub(&quot;\'&quot;,&quot;&quot;, MHData$ProvideMHCoverage)
 MHData$AnonymityProtected &lt;- gsub(&quot;\'&quot;,&quot;&quot;, MHData$AnonymityProtected)
 MHData$MHHurtCareer &lt;- gsub(&quot;\'&quot;,&quot;&quot;, MHData$MHHurtCareer)
