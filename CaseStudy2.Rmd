@@ -16,13 +16,14 @@ The data included in this study is provided by Open Sourcing Mental Illnes, LTD.
 As mental health starts to move from the shadows of everyday life to the forefront of social media, traditional news outlets, and even at the dinner table, the team decided to put several questions to analysis to better understand issues around mental health.
 
 The team set out to answer several questions:
-1.   Do certain technology job roles line up with specific mental health diagnoses?
-2.   Is mental healthcare coverage higher in certain states?
-3.   Are there higher reports of mental health issues for remote workers?
-4.   Do workes with substance abuse disorder feel more or less willing to discuss their issue with their supervisor when compared to other disorders?
-5.   Do workers with substance abuse disorder report that their anonymity was more or less protected when compmared to other mental health issues?
-6.   Do workers with substance abuse disorder report that they have more experience with unsuportive response when compared to other mental health issues?
-7.   Do workers with substance abuse disorder report that they experience negative consequences for divulging menthal health issues?
+
+1. Do certain technology job roles line up with specific mental health diagnoses?
+2. Is mental healthcare coverage higher in certain states?
+3. Are there higher reports of mental health issues for remote workers?
+4. Do workes with substance abuse disorder feel more or less willing to discuss their issue with their supervisor when compared to other disorders?
+5. Do workers with substance abuse disorder report that their anonymity was more or less protected when compmared to other mental health issues?
+6. Do workers with substance abuse disorder report that they have more experience with unsuportive response when compared to other mental health issues?
+7. Do workers with substance abuse disorder report that they experience negative consequences for divulging menthal health issues?
 
 The analysis below shows the detail and ouputs of the analysis performed on the data set.
 
@@ -401,7 +402,7 @@ cor(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)
 
 ## State Analysis
 
-1.   Is mental healthcare coverage higher in certain states?
+1. Is mental healthcare coverage higher in certain states?
 
 The team subsetted the data to only rows that had state names and for rows that had identified if the company provided mental health coverage.  From this inital exclusion of data the data was subsetted from 1,433 rows of data to 515 rows of data which constitutes 36% of useable data.
 
@@ -517,18 +518,20 @@ StateAnalysis <- StateAnalysis[!(StateAnalysis$State=="District of Columbia"),]
 
 ## Remote Working Analysis
 
-1.   Are there higher reports of mental health issues for remote workers?
+1. Are there higher reports of mental health issues for remote workers?
 
 The team subsetted the data to include the columns of 'WorkRemotely' and 'NUM_MHCurrently'.  These two columns are used to indicate if the observation has a mental health issue or not.  The team provided multiple ways to cross check the results to ensure that the results were verified.
 
 A table is produced that aggregates the groups by the categorical variable 'WorkRemotely'
-    a.   Always
-    b.   Never
-    c.   Sometimes
+
+a. Always
+b. Never
+c. Sometimes
 
 The binary responses of 'NUM_MHCurrently' are:
-    a.   No = 0
-    b.   Yes = 1
+
+a. No = 0
+b. Yes = 1
 
 A proportion table is provided that shows the percentage of receiving a mental health issue by category.  From first look it seems that there is no significant chance of recieving a mental health issue from any of the categorical variables.  To test and confirm this hyptohesis the team decided to do a chi square test, a regression test, and a simple ANOVA test.  For each of these tests the p-value is greater than alpha of 0.05 indicating that there is no statistically significant chance of recieving a mental health issue from working at home, working at the office and at home, or working in the office full time.
 
@@ -576,9 +579,8 @@ A table is produced that aggregates the groups by the binary variable 'HasSubsta
 
 The binary responses of 'NUM_DiscussMHWithBoss' are:
 
-No = 0
-
-Yes = 1
+a. No = 0
+b. Yes = 1
 
 A proportion table is provided that shows the percentage of workers with mental health issues that would discuss the issue with their direct supervisor. It appears that workers with a substance abuse disorder are more likely to discuss the situation with their boss when compared to workers with other mental health issues. 59.1% of workers with a substance abuse problem would discuss the issue with their supervisor compared to 53.8% of workers with other mental health issues. 
 
@@ -613,9 +615,8 @@ A table is produced that aggregates the groups by the binary variable 'HasSubsta
 
 The binary responses of 'NUM_AnonymityProtected' are:
 
-No = 0
-
-Yes = 1
+a. No = 0
+b. Yes = 1
 
 A proportion table is provided that shows the percentage of workers with mental health issues that believe their anonymity was protected after divulging a mental health issue. It appears that workers with a substance abuse disorder are less likely to report their anonymity was protected when compared to other mental health issues. 72.22% of workers with substance abuse disorder report their anonymity was protected compared to 83.97% of workers with other mental health issues. It is encouraging to see that workers with both substance abuse disorders and other mental health issues report a high degree of anonymity. However, further analysis is warented to determine why workers with a substance abuse disorder feel their anonymity was less protected when compared to other mental health issues.
 
@@ -649,9 +650,8 @@ A table is produced that aggregates the groups by the binary variable 'HasSubsta
 
 The binary responses of 'NUM_NegResponseWithMH' are:
 
-No = 0
-
-Yes = 1
+a. No = 0
+b. Yes = 1
 
 A proportion table is provided that shows the percentage of workers with mental health issues that report observing or experiencing an unsuportive response to a mental health issue. It appears that workers with a substance abuse disorder are more likely to observe or experience an unsuportive reponse when compared to other mental health issues. 71.43% of workers with a substance abuse disorder report an unsuportive response compared to 54.99% of workers with other mental health issues. It is disturbing to see such a high report of unsuportive responses for workers with substance abuse disorders.
 
@@ -685,9 +685,8 @@ A table is produced that aggregates the groups by the binary variable 'HasSubsta
 
 The binary responses of 'HasNegativeConsequence' are:
 
-No = 0
-
-Yes = 1
+a. No = 0
+b. Yes = 1
 
 A proportion table is provided that shows the percentage of workers with mental health issues that report experiencing negative consequences after divulging a mental health issue. Interestinlgy enough, both employees with substance abuse disorder and other mental health issues experienced similar rates of negative consequences. 73.33% of workers with substance abuse disorder reported experiencing negative consequences compared to 73.82% of workers with other mental health issues. It is unfortunate so see such a high percentage of workers reporting experiencing negative consequences after divulging a menthal health issue. Further investigation is waranted to determine the high rate of negative consequences.
 

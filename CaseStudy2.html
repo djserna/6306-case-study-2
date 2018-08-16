@@ -129,7 +129,16 @@ $(document).ready(function () {
 <h2>Mental health within the workplace</h2>
 <p>The data included in this study is provided by Open Sourcing Mental Illnes, LTD. The survey was conducted to determine attitudes towards mental health disorders with tech workers. <a href="https://www.kaggle.com/osmi/mental-health-in-tech-2016/home">Survey data can be found here</a>.</p>
 <p>As mental health starts to move from the shadows of everyday life to the forefront of social media, traditional news outlets, and even at the dinner table, the team decided to put several questions to analysis to better understand issues around mental health.</p>
-<p>The team set out to answer several questions: 1. Do certain technology job roles line up with specific mental health diagnoses? 2. Is mental healthcare coverage higher in certain states? 3. Are there higher reports of mental health issues for remote workers? 4. Do workes with substance abuse disorder feel more or less willing to discuss their issue with their supervisor when compared to other disorders? 5. Do workers with substance abuse disorder report that their anonymity was more or less protected when compmared to other mental health issues? 6. Do workers with substance abuse disorder report that they have more experience with unsuportive response when compared to other mental health issues? 7. Do workers with substance abuse disorder report that they experience negative consequences for divulging menthal health issues?</p>
+<p>The team set out to answer several questions:</p>
+<ol style="list-style-type: decimal">
+<li>Do certain technology job roles line up with specific mental health diagnoses?</li>
+<li>Is mental healthcare coverage higher in certain states?</li>
+<li>Are there higher reports of mental health issues for remote workers?</li>
+<li>Do workes with substance abuse disorder feel more or less willing to discuss their issue with their supervisor when compared to other disorders?</li>
+<li>Do workers with substance abuse disorder report that their anonymity was more or less protected when compmared to other mental health issues?</li>
+<li>Do workers with substance abuse disorder report that they have more experience with unsuportive response when compared to other mental health issues?</li>
+<li>Do workers with substance abuse disorder report that they experience negative consequences for divulging menthal health issues?</li>
+</ol>
 <p>The analysis below shows the detail and ouputs of the analysis performed on the data set.</p>
 <pre class="r"><code>#load necessary libraries for this analysis.
 if (!require(plyr)) install.packages(&quot;plyr&quot;)</code></pre>
@@ -777,8 +786,17 @@ StateAnalysis &lt;- StateAnalysis[!(StateAnalysis$State==&quot;District of Colum
 <li>Are there higher reports of mental health issues for remote workers?</li>
 </ol>
 <p>The team subsetted the data to include the columns of ‘WorkRemotely’ and ‘NUM_MHCurrently’. These two columns are used to indicate if the observation has a mental health issue or not. The team provided multiple ways to cross check the results to ensure that the results were verified.</p>
-<p>A table is produced that aggregates the groups by the categorical variable ‘WorkRemotely’ a. Always b. Never c. Sometimes</p>
-<p>The binary responses of ‘NUM_MHCurrently’ are: a. No = 0 b. Yes = 1</p>
+<p>A table is produced that aggregates the groups by the categorical variable ‘WorkRemotely’</p>
+<ol style="list-style-type: lower-alpha">
+<li>Always</li>
+<li>Never</li>
+<li>Sometimes</li>
+</ol>
+<p>The binary responses of ‘NUM_MHCurrently’ are:</p>
+<ol style="list-style-type: lower-alpha">
+<li>No = 0</li>
+<li>Yes = 1</li>
+</ol>
 <p>A proportion table is provided that shows the percentage of receiving a mental health issue by category. From first look it seems that there is no significant chance of recieving a mental health issue from any of the categorical variables. To test and confirm this hyptohesis the team decided to do a chi square test, a regression test, and a simple ANOVA test. For each of these tests the p-value is greater than alpha of 0.05 indicating that there is no statistically significant chance of recieving a mental health issue from working at home, working at the office and at home, or working in the office full time.</p>
 <p>From the data set provided the team concluded that there is no significant chance of being diagonsed with a mental health issue from individuals that work at the office, home, or both.</p>
 <pre class="r"><code>##############################
@@ -852,8 +870,10 @@ summary(fitRW)</code></pre>
 <p>The team subsetted the data to include the columns of ‘HasSubstanceAbuse’ and ‘NUM_DiscussMHWithBoss’. The NUM_DiscussMHWithBoss column is used to indicate if the observation is willing to discuss their mental health issue with their direct supervisor. The HasSubstanceAbuse column indicates if the observation’s mental health issue relates to substance abuse.</p>
 <p>A table is produced that aggregates the groups by the binary variable ‘HasSubstanceAbuse’</p>
 <p>The binary responses of ‘NUM_DiscussMHWithBoss’ are:</p>
-<p>No = 0</p>
-<p>Yes = 1</p>
+<ol style="list-style-type: lower-alpha">
+<li>No = 0</li>
+<li>Yes = 1</li>
+</ol>
 <p>A proportion table is provided that shows the percentage of workers with mental health issues that would discuss the issue with their direct supervisor. It appears that workers with a substance abuse disorder are more likely to discuss the situation with their boss when compared to workers with other mental health issues. 59.1% of workers with a substance abuse problem would discuss the issue with their supervisor compared to 53.8% of workers with other mental health issues.</p>
 <pre class="r"><code>#Get a subset of workers with mental health issues for analysis
 MHSubstanceAbuseSupervisor &lt;- sqldf(&quot;SELECT 
@@ -911,8 +931,10 @@ summary(fitSA)</code></pre>
 <p>The team subsetted the data to include the columns of ‘HasSubstanceAbuse’ and ‘NUM_AnonymityProtected’. The NUM_AnonymityProtected column is used to indicate if the observation reports their anonymity was protected after divulging their mental health issue. The HasSubstanceAbuse column indicates if the observation’s mental health issue relates to substance abuse.</p>
 <p>A table is produced that aggregates the groups by the binary variable ‘HasSubstanceAbuse’</p>
 <p>The binary responses of ‘NUM_AnonymityProtected’ are:</p>
-<p>No = 0</p>
-<p>Yes = 1</p>
+<ol style="list-style-type: lower-alpha">
+<li>No = 0</li>
+<li>Yes = 1</li>
+</ol>
 <p>A proportion table is provided that shows the percentage of workers with mental health issues that believe their anonymity was protected after divulging a mental health issue. It appears that workers with a substance abuse disorder are less likely to report their anonymity was protected when compared to other mental health issues. 72.22% of workers with substance abuse disorder report their anonymity was protected compared to 83.97% of workers with other mental health issues. It is encouraging to see that workers with both substance abuse disorders and other mental health issues report a high degree of anonymity. However, further analysis is warented to determine why workers with a substance abuse disorder feel their anonymity was less protected when compared to other mental health issues.</p>
 <pre class="r"><code>#Get a subset of workers with mental health issues for analysis
 MHSubstanceAbuseAnonymity &lt;- sqldf(&quot;SELECT 
@@ -975,8 +997,10 @@ summary(fitSAA)</code></pre>
 <p>The team subsetted the data to include the columns of ‘HasSubstanceAbuse’ and ‘NUM_NegResponseWithMH’. The NUM_NegResponseWithMH column is used to indicate if the observation reports observing or experiencing an unsuportive repsonse with mental health issues in the workplace. The HasSubstanceAbuse column indicates if the observation’s mental health issue relates to substance abuse.</p>
 <p>A table is produced that aggregates the groups by the binary variable ‘HasSubstanceAbuse’</p>
 <p>The binary responses of ‘NUM_NegResponseWithMH’ are:</p>
-<p>No = 0</p>
-<p>Yes = 1</p>
+<ol style="list-style-type: lower-alpha">
+<li>No = 0</li>
+<li>Yes = 1</li>
+</ol>
 <p>A proportion table is provided that shows the percentage of workers with mental health issues that report observing or experiencing an unsuportive response to a mental health issue. It appears that workers with a substance abuse disorder are more likely to observe or experience an unsuportive reponse when compared to other mental health issues. 71.43% of workers with a substance abuse disorder report an unsuportive response compared to 54.99% of workers with other mental health issues. It is disturbing to see such a high report of unsuportive responses for workers with substance abuse disorders.</p>
 <pre class="r"><code>#Get a subset of workers with mental health issues for analysis
 MHSubstanceAbuseNegResponse &lt;- sqldf(&quot;SELECT 
@@ -1036,8 +1060,10 @@ summary(fitSAR)</code></pre>
 <p>The team subsetted the data to include the columns of ‘HasSubstanceAbuse’, ‘CAT_MHHurtCareer’, ‘NUM_ObsNegOpenWithMH’, and ‘NUM_CoWorkersViewYouNegKnewMH.’ We utilized 3 data points (‘CAT_MHHurtCareer’, ‘NUM_ObsNegOpenWithMH’, and ‘NUM_CoWorkersViewYouNegKnewMH’) as an aggregation to generate the “HasNegativeConsequence” column. If any of these questions were answered positively, we set the HasNegativeConsequence column to 1. Since many factors could be interpreted as negative consequences, we felt this was the best way to guage the situation. The HasSubstanceAbuse column indicates if the observation’s mental health issue relates to substance abuse.</p>
 <p>A table is produced that aggregates the groups by the binary variable ‘HasSubstanceAbuse’</p>
 <p>The binary responses of ‘HasNegativeConsequence’ are:</p>
-<p>No = 0</p>
-<p>Yes = 1</p>
+<ol style="list-style-type: lower-alpha">
+<li>No = 0</li>
+<li>Yes = 1</li>
+</ol>
 <p>A proportion table is provided that shows the percentage of workers with mental health issues that report experiencing negative consequences after divulging a mental health issue. Interestinlgy enough, both employees with substance abuse disorder and other mental health issues experienced similar rates of negative consequences. 73.33% of workers with substance abuse disorder reported experiencing negative consequences compared to 73.82% of workers with other mental health issues. It is unfortunate so see such a high percentage of workers reporting experiencing negative consequences after divulging a menthal health issue. Further investigation is waranted to determine the high rate of negative consequences.</p>
 <pre class="r"><code>#Get a subset of workers with mental health issues for analysis
 MHSubstanceAbuseNegConsequence &lt;- sqldf(&quot;SELECT 
