@@ -719,3 +719,10 @@ chisq.test(table(HasSubstanceAbuse=MHSubstanceAbuseNegConsequence$HasSubstanceAb
 fitSAC <- glm(HasNegativeConsequence ~ HasSubstanceAbuse, data=MHSubstanceAbuseNegConsequence, family = binomial )
 summary(fitSAC)
 ```
+
+## Mental health conclusion
+
+The team has done initial analysis around the questions originally poised.  The data set has lead into several interesting outcomes, however due to the lack of information around the survey the team is unable to apply generalizations to a wider population.  The Open Source Mental Illness (OSMI) group does not provide information on how the survey was distributed and how the responses were recorded.  Without knowing the full-size population or if the survey was randomly sent to individuals the team is unable to apply any generalization to a population that is outside of this study.
+
+Though and generalizations can be concluded this study does provide insight on additional aspects in mental health that should be investigated further.  Items such as why workers with substance abuse disorders feel that their privacy was less protected, is an aspect that could use additional investigation.  The study has limited use but does provide a baseline to compare against other studies that could provide a longitudinal comparison.
+ 
