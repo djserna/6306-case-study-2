@@ -20,9 +20,9 @@ The team set out to answer several questions:
 1. Do certain technology job roles line up with specific mental health diagnoses?
 2. Is mental healthcare coverage higher in certain states?
 3. Are there higher reports of mental health issues for remote workers?
-4. Do workes with substance abuse disorder feel more or less willing to discuss their issue with their supervisor when compared to other disorders?
-5. Do workers with substance abuse disorder report that their anonymity was more or less protected when compmared to other mental health issues?
-6. Do workers with substance abuse disorder report that they have more experience with unsuportive response when compared to other mental health issues?
+4. Do workers with substance abuse disorder feel more or less willing to discuss their issue with their supervisor when compared to other disorders?
+5. Do workers with substance abuse disorder report that their anonymity was more or less protected when compared to other mental health issues?
+6. Do workers with substance abuse disorder report that they have more experience with unsupportive response when compared to other mental health issues?
 7. Do workers with substance abuse disorder report that they experience negative consequences for divulging mental health issues?
 
 The analysis below shows the detail and ouputs of the analysis performed on the data set.
@@ -406,7 +406,7 @@ cor(MHPositionSplitCoded$DiagnosisCode, MHPositionSplitCoded$PositionCode)
 
 The team subsetted the data to only rows that had state names and for rows that had identified if the company provided mental health coverage.  From this inital exclusion of data the data was subsetted from 1,433 rows of data to 515 rows of data which constitutes 36% of useable data.
 
-From the limited data set we can see that most companies offer mental health insurance. When normalizing the data to the per 1000 square miles of each state, we see that Rhode Island, Massachusetts, and Maryland have thie highest coverage of mental health insurance.  This coincides when charting the coverage by region, which shows the Northeast region of the US having the highest coverage.
+From the limited data set we can see that most companies offer mental health insurance. When normalizing the data to the per 1000 square miles of each state, we see that Rhode Island, Massachusetts, and Maryland have the highest coverage of mental health insurance.  This coincides when charting the coverage by region, which shows the Northeast region of the US having the highest coverage.
 
 Though the analysis shows the Northeast having the most insured individuals with mental health coverage, the results should be used cautiously as the bulk of the observations are unuseable due to a lack of response.
 
@@ -642,9 +642,9 @@ fitSAA <- glm(NUM_AnonymityProtected ~ HasSubstanceAbuse, data=MHSubstanceAbuseA
 summary(fitSAA)
 ```
 
-3. Do workers with substance abuse disorder report that they have experience with unsuportive responses when compared to other mental health issues?
+3. Do workers with substance abuse disorder report that they have experience with unsupportive responses when compared to other mental health issues?
 
-The team subsetted the data to include the columns of 'HasSubstanceAbuse' and 'NUM_NegResponseWithMH'.  The NUM_NegResponseWithMH column is used to indicate if the observation reports observing or experiencing an unsuportive repsonse with mental health issues in the workplace. The HasSubstanceAbuse column indicates if the observation's mental health issue relates to substance abuse.
+The team subsetted the data to include the columns of 'HasSubstanceAbuse' and 'NUM_NegResponseWithMH'.  The NUM_NegResponseWithMH column is used to indicate if the observation reports observing or experiencing an unsupportive repsonse with mental health issues in the workplace. The HasSubstanceAbuse column indicates if the observation's mental health issue relates to substance abuse.
 
 A table is produced that aggregates the groups by the binary variable 'HasSubstanceAbuse'
 
@@ -653,7 +653,7 @@ The binary responses of 'NUM_NegResponseWithMH' are:
 a. No = 0
 b. Yes = 1
 
-A proportion table is provided that shows the percentage of workers with mental health issues that report observing or experiencing an unsuportive response to a mental health issue. It appears that workers with a substance abuse disorder are more likely to observe or experience an unsuportive reponse when compared to other mental health issues. 71.43% of workers with a substance abuse disorder report an unsuportive response compared to 54.99% of workers with other mental health issues. It is disturbing to see such a high report of unsuportive responses for workers with substance abuse disorders.
+A proportion table is provided that shows the percentage of workers with mental health issues that report observing or experiencing an unsupportive response to a mental health issue. It appears that workers with a substance abuse disorder are more likely to observe or experience an unsupportive response when compared to other mental health issues. 71.43% of workers with a substance abuse disorder report an unsupportive response compared to 54.99% of workers with other mental health issues. It is disturbing to see such a high report of unsupportive responses for workers with substance abuse disorders.
 
 ```{r substanceAbuseNegResponse}
 #Get a subset of workers with mental health issues for analysis
